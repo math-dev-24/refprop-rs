@@ -31,7 +31,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("Saturation at P=500 kPa:\n{sat2}\n");
 
     // ================================================================
-    //  3. CoolProp‑style generic "get" function
+    //  3. CoolProp-style generic "get" function
     // ================================================================
     println!("=== Generic get() – CoolProp style ===\n");
 
@@ -51,7 +51,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let eta = r410a.get("ETA", "P", 500.0, "T", 298.15)?;
     println!("R410A  eta(P=500, T=298.15) = {eta:.4} µPa·s");
 
-    // Entropy of R410A at T=280 K, Q=0.5 (two‑phase)
+    // Entropy of R410A at T=280 K, Q=0.5 (two-phase)
     let s = r410a.get("S", "T", 280.0, "Q", 0.5)?;
     println!("R410A  S(T=280, Q=0.5) = {s:.4} J/(mol·K)");
 

@@ -1,3 +1,9 @@
+//! Low-level FFI bindings for NIST REFPROP.
+//!
+//! This module dynamically loads the REFPROP shared library (DLL/so)
+//! at runtime via [`libloading`] and pre-resolves all function pointers
+//! for zero-overhead calls.
+
 #![allow(non_snake_case)]
 
 use std::os::raw::{c_char, c_double, c_int, c_long};
@@ -105,8 +111,8 @@ type FnInfo = unsafe extern "C" fn(
 
 // ── Dynamic library wrapper ─────────────────────────────────────────
 
-/// Holds a dynamically‑loaded REFPROP shared library with **pre‑resolved
-/// function pointers** for zero‑overhead calls.
+/// Holds a dynamically-loaded REFPROP shared library with **pre-resolved
+/// function pointers** for zero-overhead calls.
 ///
 /// All function symbols are resolved once at construction time.  If any
 /// required symbol is missing the constructor returns an error instead
@@ -154,7 +160,7 @@ impl RefpropLibrary {
         Ok(*sym)
     }
 
-    /// Resolve **all** required REFPROP symbols from an already‑loaded
+    /// Resolve **all** required REFPROP symbols from an already-loaded
     /// library.  Fails on the first missing symbol.
     fn resolve_all(lib: Library) -> Result<Self, RefpropSysError> {
         Ok(Self {
@@ -179,14 +185,14 @@ impl RefpropLibrary {
     /// Try to load the REFPROP shared library from a **directory** that
     /// contains the DLL / .so.  Common file names are tried automatically.
     ///
-    /// On 64‑bit Windows the 64‑bit DLL (`REFPRP64.DLL`) is tried first.
+    /// On 64-bit Windows the 64-bit DLL (`REFPRP64.DLL`) is tried first.
     /// If a candidate file exists but cannot be loaded (e.g. architecture
     /// mismatch), the next candidate is tried.
     ///
     /// All required symbols are resolved eagerly.  If any symbol is
     /// missing, an error is returned immediately.
     pub fn load_from_dir(dir: &Path) -> Result<Self, RefpropSysError> {
-        // Order matters: prefer 64‑bit DLL on 64‑bit targets.
+        // Order matters: prefer 64-bit DLL on 64-bit targets.
         let candidates: &[&str] = if cfg!(target_os = "windows") {
             if cfg!(target_pointer_width = "64") {
                 &["REFPRP64.DLL", "REFPROP.DLL", "refprop.dll"]
@@ -215,7 +221,7 @@ impl RefpropLibrary {
             }
         }
 
-        // 2. Fall back to system‑wide search (PATH / LD_LIBRARY_PATH)
+        // 2. Fall back to system-wide search (PATH / LD_LIBRARY_PATH)
         for name in candidates {
             if let Ok(lib) = unsafe { Library::new(*name) } {
                 return Self::resolve_all(lib);
@@ -243,7 +249,7 @@ impl RefpropLibrary {
 
     // ── REFPROP function wrappers ───────────────────────────────────
     //
-    // Each method calls the pre‑resolved function pointer directly.
+    // Each method calls the pre-resolved function pointer directly.
     // No symbol lookup occurs at call time – this is the key
     // performance improvement over the previous design.
 
@@ -275,7 +281,7 @@ impl RefpropLibrary {
         }
     }
 
-    /// Temperature–pressure flash calculation.
+    /// Temperature-pressure flash calculation.
     pub unsafe fn TPFLSHdll(
         &self,
         t: *const c_double,
@@ -305,7 +311,7 @@ impl RefpropLibrary {
         }
     }
 
-    /// Pressure–enthalpy flash calculation.
+    /// Pressure-enthalpy flash calculation.
     pub unsafe fn PHFLSHdll(
         &self,
         p: *const c_double,
@@ -335,7 +341,7 @@ impl RefpropLibrary {
         }
     }
 
-    /// Pressure–entropy flash calculation.
+    /// Pressure-entropy flash calculation.
     pub unsafe fn PSFLSHdll(
         &self,
         p: *const c_double,
@@ -401,7 +407,7 @@ impl RefpropLibrary {
         unsafe { (self.fn_satp)(p, z, kph, t, dl, dv, x, y, ierr, herr, herr_length) };
     }
 
-    /// Critical‑point properties.
+    /// Critical-point properties.
     pub unsafe fn CRITPdll(
         &self,
         z: *const c_double,
@@ -499,7 +505,7 @@ impl RefpropLibrary {
 
 // ── String helpers ──────────────────────────────────────────────────
 
-/// Convert a Rust `&str` into a zero‑padded `Vec<c_char>` of length
+/// Convert a Rust `&str` into a zero-padded `Vec<c_char>` of length
 /// `max_len`, suitable for passing to a Fortran routine.
 pub fn to_c_string(s: &str, max_len: usize) -> Vec<c_char> {
     let mut buffer = vec![0 as c_char; max_len];
@@ -511,7 +517,7 @@ pub fn to_c_string(s: &str, max_len: usize) -> Vec<c_char> {
     buffer
 }
 
-/// Convert a null‑terminated (or fully‑filled) Fortran `c_char` buffer
+/// Convert a null-terminated (or fully-filled) Fortran `c_char` buffer
 /// back into a trimmed Rust `String`.
 pub fn from_c_string(buffer: &[c_char]) -> String {
     let bytes: Vec<u8> = buffer

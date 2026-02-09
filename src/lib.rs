@@ -9,9 +9,9 @@
 //! * **Pure fluids** — `Fluid::new("R134A")`
 //! * **Predefined mixtures** — `Fluid::new("R410A")` (loaded from `.MIX`)
 //! * **Custom mixtures** — `Fluid::mixture(&[("R32", 0.5), ("R125", 0.5)])`
-//! * **CoolProp‑style `get()`** — `fluid.get("D", "T", 0.0, "Q", 1.0)`
+//! * **CoolProp-style `get()`** — `fluid.get("D", "T", 0.0, "Q", 1.0)`
 //! * **Configurable units** — work in °C + bar, K + kPa, or any combination
-//! * **Thread‑safe** — global mutex prevents data races on REFPROP's singleton state
+//! * **Thread-safe** — global mutex prevents data races on REFPROP's singleton state
 //!
 //! ## Quick example
 //!
@@ -58,20 +58,16 @@
 //! )?;
 //! # Ok::<(), refprop::RefpropError>(())
 //! ```
-//!
-//! ## Crate layout
-//!
-//! | Crate | Role |
-//! |-------|------|
-//! | [`refprop-sys`] | Low‑level FFI: dynamic DLL loading via `libloading` |
-//! | [`converter`] | [`UnitSystem`] + [`Converter`] (standalone, no deps) |
-//! | [`refprop`](crate) | High‑level API: [`Fluid`], `get()`, flash, units |
 
-pub mod backend;
+// ── Internal modules ─────────────────────────────────────────────────
+mod backend;
+pub mod converter;
 pub mod error;
+pub mod sys;
 pub mod fluid;
 pub mod properties;
 
+// ── Public re-exports ────────────────────────────────────────────────
 pub use error::{RefpropError, Result};
 pub use fluid::Fluid;
 pub use properties::{

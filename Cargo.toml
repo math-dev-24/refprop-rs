@@ -1,3 +1,22 @@
-[workspace]
-members = ["refprop-sys", "refprop", "converter"]
-resolver = "3"
+[package]
+name = "refprop-rs"
+version = "0.1.0"
+edition = "2024"
+description = "Safe Rust bindings for NIST REFPROP – thermodynamic & transport properties of refrigerants, pure fluids, and mixtures"
+license = "MIT"
+repository = "https://github.com/math-dev-24/refprop-rs"
+readme = "README.md"
+keywords = ["refprop", "thermodynamics", "refrigerant", "coolprop", "nist"]
+categories = ["science", "api-bindings"]
+
+[lib]
+name = "refprop"
+path = "src/lib.rs"
+
+[dependencies]
+libloading = "0.9"
+thiserror = "2.0"
+dotenvy = "0.15"
+
+[dev-dependencies]
+approx = "0.5"

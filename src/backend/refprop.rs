@@ -3,14 +3,14 @@ use std::path::PathBuf;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{Mutex, MutexGuard};
 
-use refprop_sys::*;
+use crate::sys::*;
 
 use crate::error::*;
 use crate::properties::*;
 
-// ── Global lock (REFPROP is NOT thread‑safe) ────────────────────────
+// ── Global lock (REFPROP is NOT thread-safe) ────────────────────────
 // The lock value tracks which backend ID is currently loaded so we
-// only re‑call SETUPdll when the active fluid changes.
+// only re-call SETUPdll when the active fluid changes.
 static REFPROP_LOCK: Mutex<usize> = Mutex::new(0);
 static NEXT_BACKEND_ID: AtomicUsize = AtomicUsize::new(1);
 
@@ -25,7 +25,7 @@ pub struct RefpropBackend {
     nc: usize,
     /// Molar composition array.
     z: [f64; REFPROP_NC_MAX],
-    /// Pipe‑separated fluid file string, e.g. `"R134A.FLD"` or
+    /// Pipe-separated fluid file string, e.g. `"R134A.FLD"` or
     /// `"R32.FLD|R125.FLD"`.
     hfld_str: String,
 }
@@ -36,7 +36,7 @@ impl RefpropBackend {
     // ================================================================
 
     /// Create a backend for a **pure fluid** or a **predefined mixture**
-    /// (auto‑detected from `.FLD` / `.MIX` files).
+    /// (auto-detected from `.FLD` / `.MIX` files).
     pub fn new(fluid_name: &str, refprop_path: &str) -> Result<Self> {
         let path = PathBuf::from(refprop_path);
         if !path.exists() {
@@ -543,7 +543,7 @@ impl RefpropBackend {
     }
 
     // ================================================================
-    //  Molar mass (mixture‑averaged)
+    //  Molar mass (mixture-averaged)
     // ================================================================
 
     /// Compute the molar mass of the loaded fluid or mixture (g/mol).
@@ -572,7 +572,7 @@ impl RefpropBackend {
     }
 
     // ================================================================
-    //  Generic "get" – CoolProp‑style PropsSI
+    //  Generic "get" – CoolProp-style PropsSI
     // ================================================================
 
     /// Retrieve a single property value given two input constraints.
@@ -584,7 +584,7 @@ impl RefpropBackend {
     /// ```
     ///
     /// Supported input pairs: **(T,P)  (P,H)  (P,S)  (T,Q)  (P,Q)**.
-    /// Keys are **case‑insensitive**.
+    /// Keys are **case-insensitive**.
     pub fn get(
         &self,
         output: &str,

@@ -1,7 +1,7 @@
 //! Configurable unit conversion for REFPROP values.
 //!
 //! REFPROP internally uses: **K, kPa, mol/L, J/mol, J/(mol·K), µPa·s,
-//! W/(m·K), m/s**.  This crate lets you work in whatever units you
+//! W/(m·K), m/s**.  This module lets you work in whatever units you
 //! prefer (°C, bar, kg/m³, kJ/kg, …) and handles the conversion
 //! transparently.
 //!
@@ -16,7 +16,7 @@
 //! # Builder
 //!
 //! ```
-//! use converter::{UnitSystem, TempUnit, PressUnit};
+//! use refprop::{UnitSystem, TempUnit, PressUnit};
 //!
 //! let units = UnitSystem::new()
 //!     .temperature(TempUnit::Celsius)
@@ -75,7 +75,7 @@ pub enum EnergyUnit {
     JPerKg,
 }
 
-/// Entropy / heat‑capacity unit (energy per temperature).
+/// Entropy / heat-capacity unit (energy per temperature).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum EntropyUnit {
     /// J/(mol·K) (REFPROP native)
@@ -126,7 +126,7 @@ pub struct UnitSystem {
 }
 
 impl UnitSystem {
-    /// Start from REFPROP‑native units.  Use the builder methods to
+    /// Start from REFPROP-native units.  Use the builder methods to
     /// change individual properties.
     pub fn new() -> Self { Self::refprop() }
 
@@ -197,7 +197,7 @@ impl Default for UnitSystem {
 #[derive(Debug, Clone)]
 pub struct Converter {
     pub units: UnitSystem,
-    /// Molar mass in g/mol (mixture‑averaged for mixtures).
+    /// Molar mass in g/mol (mixture-averaged for mixtures).
     pub molar_mass: f64,
 }
 
@@ -207,7 +207,7 @@ impl Converter {
     }
 
     /// Identity converter — no conversion at all (REFPROP native units,
-    /// molar mass = 1 so mass‑based formulas still work formally).
+    /// molar mass = 1 so mass-based formulas still work formally).
     pub fn identity() -> Self {
         Self { units: UnitSystem::refprop(), molar_mass: 1.0 }
     }
@@ -354,9 +354,9 @@ impl Converter {
         }
     }
 
-    // ── Generic key‑based conversion ────────────────────────────────
+    // ── Generic key-based conversion ────────────────────────────────
 
-    /// Convert a user‑provided input value to REFPROP units, choosing
+    /// Convert a user-provided input value to REFPROP units, choosing
     /// the right conversion based on the property key (e.g. `"T"`,
     /// `"P"`, `"H"`, …).
     pub fn input_to_rp(&self, key: &str, val: f64) -> f64 {

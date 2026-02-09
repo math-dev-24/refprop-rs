@@ -1,4 +1,4 @@
-use converter::{Converter, UnitSystem};
+use crate::converter::{Converter, UnitSystem};
 
 use crate::backend::refprop::RefpropBackend;
 use crate::error::*;
@@ -7,7 +7,7 @@ use std::env;
 use std::path::Path;
 use std::sync::Once;
 
-/// High‑level entry point for REFPROP calculations.
+/// High-level entry point for REFPROP calculations.
 ///
 /// Works with **pure fluids**, **predefined mixtures**, and **custom
 /// mixtures**.  An optional [`UnitSystem`] lets you work in °C + bar
@@ -31,8 +31,8 @@ pub struct Fluid {
 impl Fluid {
     // ── Constructors ─────────────────────────────────────────────────
 
-    /// Create a `Fluid` using **REFPROP‑native units** (K, kPa, mol/L,
-    /// J/mol, …).  Fully backward‑compatible.
+    /// Create a `Fluid` using **REFPROP-native units** (K, kPa, mol/L,
+    /// J/mol, …).  Fully backward-compatible.
     pub fn new(fluid_name: &str) -> Result<Self> {
         Self::with_units(fluid_name, UnitSystem::refprop())
     }
@@ -55,7 +55,7 @@ impl Fluid {
         Ok(Self { backend, conv })
     }
 
-    /// Create a **custom mixture** with REFPROP‑native units.
+    /// Create a **custom mixture** with REFPROP-native units.
     pub fn mixture(components: &[(&str, f64)]) -> Result<Self> {
         Self::mixture_with_units(components, UnitSystem::refprop())
     }
@@ -136,7 +136,7 @@ impl Fluid {
 
     // ── Public API ───────────────────────────────────────────────────
 
-    /// **Generic property lookup** — CoolProp‑style.
+    /// **Generic property lookup** — CoolProp-style.
     ///
     /// All values are in the unit system configured at construction.
     ///
@@ -239,7 +239,7 @@ impl Fluid {
 
     /// Static fluid information (molar mass, triple point, …).
     ///
-    /// **Note:** values in this struct are always in REFPROP‑native
+    /// **Note:** values in this struct are always in REFPROP-native
     /// units regardless of the configured `UnitSystem`, because they
     /// describe intrinsic fluid constants.
     pub fn info(&self) -> Result<FluidInfo> {

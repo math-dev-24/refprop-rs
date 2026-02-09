@@ -1,6 +1,6 @@
 // ── Thermodynamic properties from a flash calculation ───────────────
 
-/// Result of a TP‑flash or PH‑flash calculation.
+/// Result of a TP-flash or PH-flash calculation.
 ///
 /// **Default REFPROP units (molar basis):**
 ///
@@ -46,7 +46,7 @@ impl std::fmt::Display for ThermoProp {
 
 // ── Saturation properties ───────────────────────────────────────────
 
-/// Saturation‑line properties returned by `SATPdll` / `SATTdll`.
+/// Saturation-line properties returned by `SATPdll` / `SATTdll`.
 ///
 /// Densities are in **mol/L**.
 #[derive(Debug, Clone, PartialEq)]
@@ -55,9 +55,9 @@ pub struct SaturationProps {
     pub temperature: f64,
     /// Saturation pressure (kPa)
     pub pressure: f64,
-    /// Saturated‑liquid density (mol/L)
+    /// Saturated-liquid density (mol/L)
     pub density_liquid: f64,
-    /// Saturated‑vapor density (mol/L)
+    /// Saturated-vapor density (mol/L)
     pub density_vapor: f64,
 }
 
@@ -115,7 +115,7 @@ impl std::fmt::Display for CriticalProps {
 pub struct FluidInfo {
     /// Molar mass (g/mol)
     pub molar_mass: f64,
-    /// Triple‑point temperature (K)
+    /// Triple-point temperature (K)
     pub triple_point_temp: f64,
     /// Normal boiling point (K)
     pub normal_boiling_point: f64,

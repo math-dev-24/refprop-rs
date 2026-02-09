@@ -19,11 +19,11 @@ pub enum RefpropError {
     #[error("Fluid file not found: {0}")]
     FluidNotFound(String),
 
-    /// Invalid or out‑of‑range input.
+    /// Invalid or out-of-range input.
     #[error("Invalid input: {0}")]
     InvalidInput(String),
 
-    /// Catch‑all for calculation failures.
+    /// Catch-all for calculation failures.
     #[error("Calculation failed: {0}")]
     CalculationFailed(String),
 }
