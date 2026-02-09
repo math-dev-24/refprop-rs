@@ -24,6 +24,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9330f8b2ff13f34540b44e946ef35111825727b38d33286ef986142615121801"
 
 [[package]]
+name = "converter"
+version = "0.1.0"
+
+[[package]]
 name = "dotenvy"
 version = "0.15.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -71,6 +75,7 @@ name = "refprop"
 version = "0.1.0"
 dependencies = [
  "approx",
+ "converter",
  "dotenvy",
  "refprop-sys",
  "thiserror",

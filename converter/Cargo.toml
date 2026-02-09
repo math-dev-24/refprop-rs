@@ -1,0 +1,10 @@
+[package]
+name = "converter"
+version = "0.1.0"
+edition = "2024"
+description = "Configurable unit conversion between REFPROP native units and user-preferred units"
+license = "MIT"
+repository = "https://github.com/math-dev-24/refprop-rs"
+keywords = ["units", "conversion", "refprop", "thermodynamics"]
+
+[dependencies]

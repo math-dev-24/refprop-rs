@@ -543,6 +543,35 @@ impl RefpropBackend {
     }
 
     // ================================================================
+    //  Molar mass (mixture‑averaged)
+    // ================================================================
+
+    /// Compute the molar mass of the loaded fluid or mixture (g/mol).
+    ///
+    /// For pure fluids this is identical to `fluid_info().molar_mass`.
+    /// For mixtures it returns M_mix = Σ z_i · M_i.
+    pub fn molar_mass_mix(&self) -> Result<f64> {
+        let mut cid = Self::lock_refprop()?;
+        self.ensure_setup(&mut cid)?;
+
+        let mut m_mix = 0.0;
+        for i in 0..self.nc {
+            let icomp: i32 = (i + 1) as i32;
+            let (mut wmm, mut d1, mut d2, mut d3, mut d4) = (0.0, 0.0, 0.0, 0.0, 0.0);
+            let (mut d5, mut d6, mut d7, mut d8, mut d9) = (0.0, 0.0, 0.0, 0.0, 0.0);
+            unsafe {
+                self.lib.INFOdll(
+                    &icomp, &mut wmm, &mut d1, &mut d2,
+                    &mut d3, &mut d4, &mut d5,
+                    &mut d6, &mut d7, &mut d8, &mut d9,
+                );
+            }
+            m_mix += self.z[i] * wmm;
+        }
+        Ok(m_mix)
+    }
+
+    // ================================================================
     //  Generic "get" – CoolProp‑style PropsSI
     // ================================================================
 
