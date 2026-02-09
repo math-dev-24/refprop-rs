@@ -1,0 +1,8 @@
+/target
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Environment (contains local paths)
+.env

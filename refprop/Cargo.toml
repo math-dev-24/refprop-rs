@@ -1,0 +1,18 @@
+[package]
+name = "refprop"
+version = "0.1.0"
+edition = "2024"
+description = "Safe Rust bindings for NIST REFPROP – thermodynamic & transport properties of refrigerants and fluids"
+license = "MIT"
+repository = "https://github.com/math-dev-24/refprop-rs"
+readme = "../README.md"
+keywords = ["refprop", "thermodynamics", "refrigerant", "coolprop", "nist"]
+categories = ["science", "api-bindings"]
+
+[dependencies]
+refprop-sys = { path = "../refprop-sys", version = "0.1.0" }
+thiserror = "2.0.14"
+dotenvy = "0.15"
+
+[dev-dependencies]
+approx = "0.5.1"
