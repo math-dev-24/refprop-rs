@@ -24,14 +24,13 @@ Add to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-refprop = { git = "https://github.com/math-dev-24/refprop-rs" }
+refprop-rs = { git = "https://github.com/math-dev-24/refprop-rs" }
 ```
 
-Or from a local path:
+The library name is `refprop`, so you import it as:
 
-```toml
-[dependencies]
-refprop = { path = "path/to/refprop-rs/refprop" }
+```rust
+use refprop::{Fluid, UnitSystem};
 ```
 
 ## Configuration
@@ -202,25 +201,32 @@ let trn  = fluid.transport(25.0, d)?;      // viscosity, conductivity
 let info = fluid.info()?;                  // molar mass, Ttrp, Tnbp, ...
 ```
 
-## Crate structure
+## Project structure
 
 ```
 refprop-rs/
-├── Cargo.toml              workspace
-├── refprop-sys/            low-level FFI (libloading)
-├── refprop/                safe public API
-│   └── examples/
-│       ├── demo.rs         engineering units showcase
-│       ├── simple.rs       pure fluid, native units
-│       └── mixture.rs      predefined & custom mixtures
-└── converter/              configurable unit conversion
+├── Cargo.toml              single crate: refprop-rs
+├── src/
+│   ├── lib.rs              public API & re-exports
+│   ├── fluid.rs            Fluid struct (high-level API)
+│   ├── converter.rs        UnitSystem + Converter
+│   ├── sys.rs              low-level FFI (libloading)
+│   ├── error.rs            error types
+│   ├── properties.rs       result structs
+│   └── backend/
+│       └── refprop.rs      REFPROP backend (flash, sat, etc.)
+└── examples/
+    ├── demo.rs             engineering units showcase
+    ├── simple.rs           pure fluid, native units
+    └── mixture.rs          predefined & custom mixtures
 ```
 
-| Crate         | Role                                             |
-|---------------|--------------------------------------------------|
-| `refprop-sys` | Dynamic DLL loading + raw FFI function wrappers   |
-| `converter`   | `UnitSystem` + `Converter` (standalone, no deps) |
-| `refprop`     | High-level API: `Fluid`, `get()`, flash, units   |
+| Module              | Role                                           |
+|---------------------|------------------------------------------------|
+| `sys`               | Dynamic DLL loading + raw FFI function wrappers |
+| `converter`         | `UnitSystem` + `Converter` (unit conversion)    |
+| `fluid`             | High-level API: `Fluid`, `get()`, flash, units  |
+| `backend::refprop`  | Core REFPROP calls, global state management     |
 
 ## License
 
