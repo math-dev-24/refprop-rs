@@ -7,18 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.1.2] - 2026-02-12
+## [0.2.0] - 2026-02-12
 
 ### Changed
 - **Breaking:** Quality (Q) is now expressed in **percent** (0–100) instead of molar fraction (0–1), both as input and output
-- `input_to_rp` now returns `Result<f64>` (was `f64`) to support input validation
+- **Breaking:** `input_to_rp` now returns `Result<f64>` (was `f64`) to support input validation
 - `props_tq` / `props_pq` quality parameter is now in percent (0–100)
 - `ThermoProp.quality` is now returned in percent (0–100)
+- `sat_t_inner` / `sat_p_inner` now accept a `kph` parameter (bubble vs dew)
 
 ### Added
 - `Converter::q_to_rp` — validates Q ∈ [0, 100] and converts to REFPROP fraction (0–1)
 - `Converter::q_from_rp` — converts REFPROP fraction (0–1) back to percent (0–100)
 - `InvalidInput` error when Q is outside the 0–100 range
+
+### Fixed
+- Zeotropic mixtures (e.g. R407C): `flash_tq_inner` / `flash_pq_inner` now select `kph` (bubble vs dew) based on quality — `kph=1` (bubble) when Q < 0.5, `kph=2` (dew) when Q ≥ 0.5 — giving correct saturation pressures for both ends
+- `interpolate_quality` now uses the saturation pressure from SATTdll/SATPdll directly instead of recomputing it via THERMdll, fixing incorrect pressure for zeotropic mixtures at Q=0 and Q=1
 
 ## [0.1.1] - 2026-02-11
 
@@ -33,7 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Thermodynamic and transport property calculations
 - Error handling with `thiserror`
 
-[Unreleased]: https://github.com/math-dev-24/refprop-rs/compare/v0.1.2...HEAD
-[0.1.2]: https://github.com/math-dev-24/refprop-rs/compare/v0.1.1...v0.1.2
+[Unreleased]: https://github.com/math-dev-24/refprop-rs/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/math-dev-24/refprop-rs/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/math-dev-24/refprop-rs/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/math-dev-24/refprop-rs/releases/tag/v0.1.0

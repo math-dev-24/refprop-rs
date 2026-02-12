@@ -409,8 +409,10 @@ impl RefpropBackend {
         })
     }
 
-    fn sat_t_inner(&self, t: f64) -> Result<SaturationProps> {
-        let kph: i32 = 1;
+    /// SATTdll wrapper.
+    ///
+    /// `kph`: **1** = bubble point, **2** = dew point.
+    fn sat_t_inner(&self, t: f64, kph: i32) -> Result<SaturationProps> {
         let (mut p, mut dl, mut dv) = (0.0, 0.0, 0.0);
         let mut x = [0.0f64; REFPROP_NC_MAX];
         let mut y = [0.0f64; REFPROP_NC_MAX];
@@ -441,8 +443,10 @@ impl RefpropBackend {
         })
     }
 
-    fn sat_p_inner(&self, p: f64) -> Result<SaturationProps> {
-        let kph: i32 = 1;
+    /// SATPdll wrapper.
+    ///
+    /// `kph`: **1** = bubble point, **2** = dew point.
+    fn sat_p_inner(&self, p: f64, kph: i32) -> Result<SaturationProps> {
         let (mut t, mut dl, mut dv) = (0.0, 0.0, 0.0);
         let mut x = [0.0f64; REFPROP_NC_MAX];
         let mut y = [0.0f64; REFPROP_NC_MAX];
@@ -531,27 +535,41 @@ impl RefpropBackend {
     }
 
     /// T–Q flash: saturation + interpolation via THERMdll.
+    ///
+    /// For zeotropic mixtures the saturation curve depends on `kph`:
+    /// `kph = 1` (bubble) when Q < 0.5, `kph = 2` (dew) when Q ≥ 0.5.
     fn flash_tq_inner(&self, t: f64, q: f64) -> Result<ThermoProp> {
-        let sat = self.sat_t_inner(t)?;
+        let kph = if q >= 0.5 { 2 } else { 1 };
+        let sat = self.sat_t_inner(t, kph)?;
         self.interpolate_quality(t, sat.pressure, sat.density_liquid, sat.density_vapor, q)
     }
 
     /// P–Q flash: saturation + interpolation via THERMdll.
+    ///
+    /// For zeotropic mixtures the saturation curve depends on `kph`:
+    /// `kph = 1` (bubble) when Q < 0.5, `kph = 2` (dew) when Q ≥ 0.5.
     fn flash_pq_inner(&self, p: f64, q: f64) -> Result<ThermoProp> {
-        let sat = self.sat_p_inner(p)?;
+        let kph = if q >= 0.5 { 2 } else { 1 };
+        let sat = self.sat_p_inner(p, kph)?;
         self.interpolate_quality(sat.temperature, p, sat.density_liquid, sat.density_vapor, q)
     }
 
     /// Interpolate between saturated liquid and vapor using quality.
+    ///
+    /// For zeotropic mixtures, THERMdll may recompute a pressure that
+    /// differs from the saturation pressure returned by SATTdll/SATPdll.
+    /// We therefore always use the saturation pressure `p` directly.
     fn interpolate_quality(&self, t: f64, p: f64, dl: f64, dv: f64, q: f64) -> Result<ThermoProp> {
         if q <= 0.0 {
             let mut props = self.therm_inner(t, dl);
             props.quality = 0.0;
+            props.pressure = p;
             return Ok(props);
         }
         if q >= 1.0 {
             let mut props = self.therm_inner(t, dv);
             props.quality = 1.0;
+            props.pressure = p;
             return Ok(props);
         }
         let liq = self.therm_inner(t, dl);
@@ -622,14 +640,14 @@ impl RefpropBackend {
         Self::validate_finite("pressure", p)?;
         let mut cid = Self::lock_refprop()?;
         self.ensure_setup(&mut cid)?;
-        self.sat_p_inner(p)
+        self.sat_p_inner(p, 1) // kph=1 → bubble point
     }
 
     pub fn saturation_t(&self, t: f64) -> Result<SaturationProps> {
         Self::validate_finite("temperature", t)?;
         let mut cid = Self::lock_refprop()?;
         self.ensure_setup(&mut cid)?;
-        self.sat_t_inner(t)
+        self.sat_t_inner(t, 1) // kph=1 → bubble point
     }
 
     pub fn transport(&self, t: f64, d: f64) -> Result<TransportProps> {
