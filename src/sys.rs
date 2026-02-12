@@ -47,66 +47,125 @@ type FnSetpath = unsafe extern "C" fn(*const c_char, c_long);
 
 /// SETUPdll(nc, hfld, hfmix, hrf, ierr, herr, len...)
 type FnSetup = unsafe extern "C" fn(
-    *const c_int, *const c_char, *const c_char, *const c_char,
-    *mut c_int, *mut c_char,
-    c_long, c_long, c_long, c_long,
+    *const c_int,
+    *const c_char,
+    *const c_char,
+    *const c_char,
+    *mut c_int,
+    *mut c_char,
+    c_long,
+    c_long,
+    c_long,
+    c_long,
 );
 
 /// TPFLSHdll / PHFLSHdll / PSFLSHdll – all share the same signature:
 /// (in1, in2, z, out1..out12, ierr, herr, herr_length)
 type FnFlash = unsafe extern "C" fn(
-    *const c_double, *const c_double, *const c_double,
-    *mut c_double, *mut c_double, *mut c_double,
-    *mut c_double, *mut c_double, *mut c_double,
-    *mut c_double, *mut c_double, *mut c_double,
-    *mut c_double, *mut c_double, *mut c_double,
-    *mut c_int, *mut c_char, c_long,
+    *const c_double,
+    *const c_double,
+    *const c_double,
+    *mut c_double,
+    *mut c_double,
+    *mut c_double,
+    *mut c_double,
+    *mut c_double,
+    *mut c_double,
+    *mut c_double,
+    *mut c_double,
+    *mut c_double,
+    *mut c_double,
+    *mut c_double,
+    *mut c_double,
+    *mut c_int,
+    *mut c_char,
+    c_long,
 );
 
 /// SATTdll / SATPdll – same signature:
 /// (in, z, kph, out1..out5, ierr, herr, herr_length)
 type FnSat = unsafe extern "C" fn(
-    *const c_double, *const c_double, *const c_int,
-    *mut c_double, *mut c_double, *mut c_double,
-    *mut c_double, *mut c_double,
-    *mut c_int, *mut c_char, c_long,
+    *const c_double,
+    *const c_double,
+    *const c_int,
+    *mut c_double,
+    *mut c_double,
+    *mut c_double,
+    *mut c_double,
+    *mut c_double,
+    *mut c_int,
+    *mut c_char,
+    c_long,
 );
 
 /// CRITPdll(z, tc, pc, dc, ierr, herr, herr_length)
 type FnCritp = unsafe extern "C" fn(
     *const c_double,
-    *mut c_double, *mut c_double, *mut c_double,
-    *mut c_int, *mut c_char, c_long,
+    *mut c_double,
+    *mut c_double,
+    *mut c_double,
+    *mut c_int,
+    *mut c_char,
+    c_long,
 );
 
 /// TRNPRPdll(t, d, z, eta, tcx, ierr, herr, herr_length)
 type FnTrnprp = unsafe extern "C" fn(
-    *const c_double, *const c_double, *const c_double,
-    *mut c_double, *mut c_double,
-    *mut c_int, *mut c_char, c_long,
+    *const c_double,
+    *const c_double,
+    *const c_double,
+    *mut c_double,
+    *mut c_double,
+    *mut c_int,
+    *mut c_char,
+    c_long,
 );
 
 /// SETMIXdll(hmxnme, hfmix, hrf, nc, hfld, z, ierr, herr, len...)
 type FnSetmix = unsafe extern "C" fn(
-    *const c_char, *const c_char, *const c_char,
-    *mut c_int, *mut c_char, *mut c_double,
-    *mut c_int, *mut c_char,
-    c_long, c_long, c_long, c_long, c_long,
+    *const c_char,
+    *const c_char,
+    *const c_char,
+    *mut c_int,
+    *mut c_char,
+    *mut c_double,
+    *mut c_int,
+    *mut c_char,
+    c_long,
+    c_long,
+    c_long,
+    c_long,
+    c_long,
 );
 
 /// THERMdll(t, d, z, p, e, h, s, cv, cp, w, hjt)
 type FnTherm = unsafe extern "C" fn(
-    *const c_double, *const c_double, *const c_double,
-    *mut c_double, *mut c_double, *mut c_double, *mut c_double,
-    *mut c_double, *mut c_double, *mut c_double, *mut c_double,
+    *const c_double,
+    *const c_double,
+    *const c_double,
+    *mut c_double,
+    *mut c_double,
+    *mut c_double,
+    *mut c_double,
+    *mut c_double,
+    *mut c_double,
+    *mut c_double,
+    *mut c_double,
 );
 
 /// INFOdll(icomp, wmm, ttrp, tnbpt, tc, pc, dc, zc, acf, dip, rgas)
 type FnInfo = unsafe extern "C" fn(
     *const c_int,
-    *mut c_double, *mut c_double, *mut c_double,
-    *mut c_double, *mut c_double, *mut c_double,
-    *mut c_double, *mut c_double, *mut c_double, *mut c_double,
+    *mut c_double,
+    *mut c_double,
+    *mut c_double,
+    *mut c_double,
+    *mut c_double,
+    *mut c_double,
+    *mut c_double,
+    *mut c_double,
+    *mut c_double,
+    *mut c_double,
 );
 
 // ── Dynamic library wrapper ─────────────────────────────────────────
@@ -127,17 +186,17 @@ pub struct RefpropLibrary {
 
     // ── Cached function pointers ────────────────────────────────────
     fn_setpath: FnSetpath,
-    fn_setup:   FnSetup,
-    fn_tpflsh:  FnFlash,
-    fn_phflsh:  FnFlash,
-    fn_psflsh:  FnFlash,
-    fn_satt:    FnSat,
-    fn_satp:    FnSat,
-    fn_critp:   FnCritp,
-    fn_trnprp:  FnTrnprp,
-    fn_setmix:  FnSetmix,
-    fn_therm:   FnTherm,
-    fn_info:    FnInfo,
+    fn_setup: FnSetup,
+    fn_tpflsh: FnFlash,
+    fn_phflsh: FnFlash,
+    fn_psflsh: FnFlash,
+    fn_satt: FnSat,
+    fn_satp: FnSat,
+    fn_critp: FnCritp,
+    fn_trnprp: FnTrnprp,
+    fn_setmix: FnSetmix,
+    fn_therm: FnTherm,
+    fn_info: FnInfo,
 }
 
 impl RefpropLibrary {
@@ -149,14 +208,12 @@ impl RefpropLibrary {
         // SAFETY: We are loading a known symbol name from a REFPROP DLL.
         // The caller (resolve_all) ensures all type aliases match the
         // actual Fortran calling convention.
-        let sym: libloading::Symbol<T> = unsafe { lib.get(name) }
-            .map_err(|_| {
-                // Strip trailing \0 for display.
-                let display = String::from_utf8_lossy(
-                    &name[..name.len().saturating_sub(1)]
-                ).to_string();
-                RefpropSysError::SymbolNotFound(display)
-            })?;
+        let sym: libloading::Symbol<T> = unsafe { lib.get(name) }.map_err(|_| {
+            // Strip trailing \0 for display.
+            let display =
+                String::from_utf8_lossy(&name[..name.len().saturating_sub(1)]).to_string();
+            RefpropSysError::SymbolNotFound(display)
+        })?;
         Ok(*sym)
     }
 
@@ -165,17 +222,17 @@ impl RefpropLibrary {
     fn resolve_all(lib: Library) -> Result<Self, RefpropSysError> {
         Ok(Self {
             fn_setpath: Self::resolve(&lib, b"SETPATHdll\0")?,
-            fn_setup:   Self::resolve(&lib, b"SETUPdll\0")?,
-            fn_tpflsh:  Self::resolve(&lib, b"TPFLSHdll\0")?,
-            fn_phflsh:  Self::resolve(&lib, b"PHFLSHdll\0")?,
-            fn_psflsh:  Self::resolve(&lib, b"PSFLSHdll\0")?,
-            fn_satt:    Self::resolve(&lib, b"SATTdll\0")?,
-            fn_satp:    Self::resolve(&lib, b"SATPdll\0")?,
-            fn_critp:   Self::resolve(&lib, b"CRITPdll\0")?,
-            fn_trnprp:  Self::resolve(&lib, b"TRNPRPdll\0")?,
-            fn_setmix:  Self::resolve(&lib, b"SETMIXdll\0")?,
-            fn_therm:   Self::resolve(&lib, b"THERMdll\0")?,
-            fn_info:    Self::resolve(&lib, b"INFOdll\0")?,
+            fn_setup: Self::resolve(&lib, b"SETUPdll\0")?,
+            fn_tpflsh: Self::resolve(&lib, b"TPFLSHdll\0")?,
+            fn_phflsh: Self::resolve(&lib, b"PHFLSHdll\0")?,
+            fn_psflsh: Self::resolve(&lib, b"PSFLSHdll\0")?,
+            fn_satt: Self::resolve(&lib, b"SATTdll\0")?,
+            fn_satp: Self::resolve(&lib, b"SATPdll\0")?,
+            fn_critp: Self::resolve(&lib, b"CRITPdll\0")?,
+            fn_trnprp: Self::resolve(&lib, b"TRNPRPdll\0")?,
+            fn_setmix: Self::resolve(&lib, b"SETMIXdll\0")?,
+            fn_therm: Self::resolve(&lib, b"THERMdll\0")?,
+            fn_info: Self::resolve(&lib, b"INFOdll\0")?,
             _lib: lib,
         })
     }
@@ -229,7 +286,10 @@ impl RefpropLibrary {
         }
 
         let detail = if errors.is_empty() {
-            format!("No REFPROP library found in {} (tried: {candidates:?})", dir.display())
+            format!(
+                "No REFPROP library found in {} (tried: {candidates:?})",
+                dir.display()
+            )
         } else {
             format!(
                 "REFPROP library found but could not be loaded:\n  - {}",
@@ -241,9 +301,8 @@ impl RefpropLibrary {
 
     /// Load the REFPROP shared library from an **exact file path**.
     pub fn load_from_file(path: &Path) -> Result<Self, RefpropSysError> {
-        let lib = unsafe { Library::new(path) }.map_err(|e| {
-            RefpropSysError::LibraryLoadFailed(format!("{}: {e}", path.display()))
-        })?;
+        let lib = unsafe { Library::new(path) }
+            .map_err(|e| RefpropSysError::LibraryLoadFailed(format!("{}: {e}", path.display())))?;
         Self::resolve_all(lib)
     }
 
@@ -275,8 +334,16 @@ impl RefpropLibrary {
     ) {
         unsafe {
             (self.fn_setup)(
-                nc, hfld, hfmix, hrf, ierr, herr,
-                hfld_length, hfmix_length, hrf_length, herr_length,
+                nc,
+                hfld,
+                hfmix,
+                hrf,
+                ierr,
+                herr,
+                hfld_length,
+                hfmix_length,
+                hrf_length,
+                herr_length,
             );
         }
     }
@@ -305,8 +372,24 @@ impl RefpropLibrary {
     ) {
         unsafe {
             (self.fn_tpflsh)(
-                t, p, z, d, dl, dv, x, y, q, e, h, s, cv, cp, w,
-                ierr, herr, herr_length,
+                t,
+                p,
+                z,
+                d,
+                dl,
+                dv,
+                x,
+                y,
+                q,
+                e,
+                h,
+                s,
+                cv,
+                cp,
+                w,
+                ierr,
+                herr,
+                herr_length,
             );
         }
     }
@@ -335,8 +418,24 @@ impl RefpropLibrary {
     ) {
         unsafe {
             (self.fn_phflsh)(
-                p, h, z, t, d, dl, dv, x, y, q, e, s, cv, cp, w,
-                ierr, herr, herr_length,
+                p,
+                h,
+                z,
+                t,
+                d,
+                dl,
+                dv,
+                x,
+                y,
+                q,
+                e,
+                s,
+                cv,
+                cp,
+                w,
+                ierr,
+                herr,
+                herr_length,
             );
         }
     }
@@ -365,8 +464,24 @@ impl RefpropLibrary {
     ) {
         unsafe {
             (self.fn_psflsh)(
-                p, s, z, t, d, dl, dv, x, y, q, e, h, cv, cp, w,
-                ierr, herr, herr_length,
+                p,
+                s,
+                z,
+                t,
+                d,
+                dl,
+                dv,
+                x,
+                y,
+                q,
+                e,
+                h,
+                cv,
+                cp,
+                w,
+                ierr,
+                herr,
+                herr_length,
             );
         }
     }
@@ -458,8 +573,19 @@ impl RefpropLibrary {
     ) {
         unsafe {
             (self.fn_setmix)(
-                hmxnme, hfmix, hrf, nc, hfld, z, ierr, herr,
-                hmxnme_length, hfmix_length, hrf_length, hfld_length, herr_length,
+                hmxnme,
+                hfmix,
+                hrf,
+                nc,
+                hfld,
+                z,
+                ierr,
+                herr,
+                hmxnme_length,
+                hfmix_length,
+                hrf_length,
+                hfld_length,
+                herr_length,
             );
         }
     }

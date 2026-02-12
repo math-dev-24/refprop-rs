@@ -70,11 +70,18 @@ impl RefpropBackend {
 
             unsafe {
                 lib.SETMIXdll(
-                    hmxnme.as_ptr(), hfmix.as_ptr(), hrf.as_ptr(),
-                    &mut nc, hfld_buf.as_mut_ptr(), z.as_mut_ptr(),
-                    &mut ierr, herr.as_mut_ptr(),
-                    REFPROP_STRLEN as c_long, REFPROP_STRLEN as c_long,
-                    REFPROP_STRLEN as c_long, REFPROP_FILESTR as c_long,
+                    hmxnme.as_ptr(),
+                    hfmix.as_ptr(),
+                    hrf.as_ptr(),
+                    &mut nc,
+                    hfld_buf.as_mut_ptr(),
+                    z.as_mut_ptr(),
+                    &mut ierr,
+                    herr.as_mut_ptr(),
+                    REFPROP_STRLEN as c_long,
+                    REFPROP_STRLEN as c_long,
+                    REFPROP_STRLEN as c_long,
+                    REFPROP_FILESTR as c_long,
                     REFPROP_STRLEN as c_long,
                 );
             }
@@ -83,14 +90,28 @@ impl RefpropBackend {
             let id = NEXT_BACKEND_ID.fetch_add(1, Ordering::Relaxed);
             let hfld_str = from_c_string(&hfld_buf);
 
-            Ok(Self { id, lib, refprop_path: path, nc: nc as usize, z, hfld_str })
+            Ok(Self {
+                id,
+                lib,
+                refprop_path: path,
+                nc: nc as usize,
+                z,
+                hfld_str,
+            })
         } else if fld_exists {
             // ── Pure fluid (.FLD file) ──────────────────────────────
             let mut z = [0.0f64; REFPROP_NC_MAX];
             z[0] = 1.0;
             let hfld_str = format!("{}.FLD", upper);
             let id = NEXT_BACKEND_ID.fetch_add(1, Ordering::Relaxed);
-            let backend = Self { id, lib, refprop_path: path, nc: 1, z, hfld_str };
+            let backend = Self {
+                id,
+                lib,
+                refprop_path: path,
+                nc: 1,
+                z,
+                hfld_str,
+            };
             backend.setup_fluid_locked()?;
             Ok(backend)
         } else {
@@ -102,10 +123,7 @@ impl RefpropBackend {
 
     /// Create a backend for a **custom mixture** with explicit
     /// composition.
-    pub fn new_mixture(
-        components: &[(&str, f64)],
-        refprop_path: &str,
-    ) -> Result<Self> {
+    pub fn new_mixture(components: &[(&str, f64)], refprop_path: &str) -> Result<Self> {
         let path = PathBuf::from(refprop_path);
         if !path.exists() {
             return Err(RefpropError::LibraryNotFound(refprop_path.to_string()));
@@ -135,7 +153,14 @@ impl RefpropBackend {
         }
 
         let id = NEXT_BACKEND_ID.fetch_add(1, Ordering::Relaxed);
-        let backend = Self { id, lib, refprop_path: path, nc, z, hfld_str };
+        let backend = Self {
+            id,
+            lib,
+            refprop_path: path,
+            nc,
+            z,
+            hfld_str,
+        };
         backend.setup_fluid_locked()?;
         Ok(backend)
     }
@@ -149,7 +174,7 @@ impl RefpropBackend {
     fn lock_refprop() -> Result<MutexGuard<'static, usize>> {
         REFPROP_LOCK.lock().map_err(|_| {
             RefpropError::CalculationFailed(
-                "REFPROP global lock is poisoned (a previous call panicked)".into()
+                "REFPROP global lock is poisoned (a previous call panicked)".into(),
             )
         })
     }
@@ -180,16 +205,19 @@ impl RefpropBackend {
 
     fn fluid_file_exists(base: &PathBuf, upper_name: &str) -> bool {
         let fld = format!("{upper_name}.FLD");
-        base.join("fluids").join(&fld).exists()
-            || base.join("FLUIDS").join(&fld).exists()
+        base.join("fluids").join(&fld).exists() || base.join("FLUIDS").join(&fld).exists()
     }
 
     fn find_mix_file(base: &PathBuf, upper_name: &str) -> Option<PathBuf> {
         let mix = format!("{upper_name}.MIX");
         let p1 = base.join("mixtures").join(&mix);
-        if p1.exists() { return Some(p1); }
+        if p1.exists() {
+            return Some(p1);
+        }
         let p2 = base.join("MIXTURES").join(&mix);
-        if p2.exists() { return Some(p2); }
+        if p2.exists() {
+            return Some(p2);
+        }
         None
     }
 
@@ -214,10 +242,16 @@ impl RefpropBackend {
 
         unsafe {
             self.lib.SETUPdll(
-                &nc_i, hfld.as_ptr(), hfmix.as_ptr(), hrf.as_ptr(),
-                &mut ierr, herr.as_mut_ptr(),
-                REFPROP_FILESTR as c_long, REFPROP_STRLEN as c_long,
-                REFPROP_STRLEN as c_long, REFPROP_STRLEN as c_long,
+                &nc_i,
+                hfld.as_ptr(),
+                hfmix.as_ptr(),
+                hrf.as_ptr(),
+                &mut ierr,
+                herr.as_mut_ptr(),
+                REFPROP_FILESTR as c_long,
+                REFPROP_STRLEN as c_long,
+                REFPROP_STRLEN as c_long,
+                REFPROP_STRLEN as c_long,
             );
         }
         Self::check_err(ierr, &herr)?;
@@ -250,66 +284,129 @@ impl RefpropBackend {
 
         unsafe {
             self.lib.TPFLSHdll(
-                &t, &p, self.z.as_ptr(),
-                &mut d, &mut dl, &mut dv,
-                x.as_mut_ptr(), y.as_mut_ptr(), &mut q,
-                &mut e, &mut h, &mut s,
-                &mut cv, &mut cp, &mut w,
-                &mut ierr, herr.as_mut_ptr(), REFPROP_STRLEN as c_long,
+                &t,
+                &p,
+                self.z.as_ptr(),
+                &mut d,
+                &mut dl,
+                &mut dv,
+                x.as_mut_ptr(),
+                y.as_mut_ptr(),
+                &mut q,
+                &mut e,
+                &mut h,
+                &mut s,
+                &mut cv,
+                &mut cp,
+                &mut w,
+                &mut ierr,
+                herr.as_mut_ptr(),
+                REFPROP_STRLEN as c_long,
             );
         }
         Self::check_err(ierr, &herr)?;
-        Ok(ThermoProp { temperature: t, pressure: p, density: d,
-            enthalpy: h, entropy: s, cv, cp, sound_speed: w,
-            quality: q, internal_energy: e })
+        Ok(ThermoProp {
+            temperature: t,
+            pressure: p,
+            density: d,
+            enthalpy: h,
+            entropy: s,
+            cv,
+            cp,
+            sound_speed: w,
+            quality: q,
+            internal_energy: e,
+        })
     }
 
     fn flash_ph_inner(&self, p: f64, h_in: f64) -> Result<ThermoProp> {
         let (mut t, mut d, mut dl, mut dv) = (0.0, 0.0, 0.0, 0.0);
         let mut x = [0.0f64; REFPROP_NC_MAX];
         let mut y = [0.0f64; REFPROP_NC_MAX];
-        let (mut q, mut e, mut s, mut cv, mut cp, mut w) =
-            (0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+        let (mut q, mut e, mut s, mut cv, mut cp, mut w) = (0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
         let mut ierr: i32 = 0;
         let mut herr = [0i8; REFPROP_STRLEN];
 
         unsafe {
             self.lib.PHFLSHdll(
-                &p, &h_in, self.z.as_ptr(),
-                &mut t, &mut d, &mut dl, &mut dv,
-                x.as_mut_ptr(), y.as_mut_ptr(), &mut q,
-                &mut e, &mut s, &mut cv, &mut cp, &mut w,
-                &mut ierr, herr.as_mut_ptr(), REFPROP_STRLEN as c_long,
+                &p,
+                &h_in,
+                self.z.as_ptr(),
+                &mut t,
+                &mut d,
+                &mut dl,
+                &mut dv,
+                x.as_mut_ptr(),
+                y.as_mut_ptr(),
+                &mut q,
+                &mut e,
+                &mut s,
+                &mut cv,
+                &mut cp,
+                &mut w,
+                &mut ierr,
+                herr.as_mut_ptr(),
+                REFPROP_STRLEN as c_long,
             );
         }
         Self::check_err(ierr, &herr)?;
-        Ok(ThermoProp { temperature: t, pressure: p, density: d,
-            enthalpy: h_in, entropy: s, cv, cp, sound_speed: w,
-            quality: q, internal_energy: e })
+        Ok(ThermoProp {
+            temperature: t,
+            pressure: p,
+            density: d,
+            enthalpy: h_in,
+            entropy: s,
+            cv,
+            cp,
+            sound_speed: w,
+            quality: q,
+            internal_energy: e,
+        })
     }
 
     fn flash_ps_inner(&self, p: f64, s_in: f64) -> Result<ThermoProp> {
         let (mut t, mut d, mut dl, mut dv) = (0.0, 0.0, 0.0, 0.0);
         let mut x = [0.0f64; REFPROP_NC_MAX];
         let mut y = [0.0f64; REFPROP_NC_MAX];
-        let (mut q, mut e, mut h, mut cv, mut cp, mut w) =
-            (0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+        let (mut q, mut e, mut h, mut cv, mut cp, mut w) = (0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
         let mut ierr: i32 = 0;
         let mut herr = [0i8; REFPROP_STRLEN];
 
         unsafe {
             self.lib.PSFLSHdll(
-                &p, &s_in, self.z.as_ptr(),
-                &mut t, &mut d, &mut dl, &mut dv,
-                x.as_mut_ptr(), y.as_mut_ptr(), &mut q,
-                &mut e, &mut h, &mut cv, &mut cp, &mut w,
-                &mut ierr, herr.as_mut_ptr(), REFPROP_STRLEN as c_long,
+                &p,
+                &s_in,
+                self.z.as_ptr(),
+                &mut t,
+                &mut d,
+                &mut dl,
+                &mut dv,
+                x.as_mut_ptr(),
+                y.as_mut_ptr(),
+                &mut q,
+                &mut e,
+                &mut h,
+                &mut cv,
+                &mut cp,
+                &mut w,
+                &mut ierr,
+                herr.as_mut_ptr(),
+                REFPROP_STRLEN as c_long,
             );
         }
         Self::check_err(ierr, &herr)?;
-        Ok(ThermoProp { temperature: t, pressure: p, density: d,
-            enthalpy: h, entropy: s_in, cv, cp, sound_speed: w,
-            quality: q, internal_energy: e })
+        Ok(ThermoProp {
+            temperature: t,
+            pressure: p,
+            density: d,
+            enthalpy: h,
+            entropy: s_in,
+            cv,
+            cp,
+            sound_speed: w,
+            quality: q,
+            internal_energy: e,
+        })
     }
 
     fn sat_t_inner(&self, t: f64) -> Result<SaturationProps> {
@@ -322,15 +419,26 @@ impl RefpropBackend {
 
         unsafe {
             self.lib.SATTdll(
-                &t, self.z.as_ptr(), &kph,
-                &mut p, &mut dl, &mut dv,
-                x.as_mut_ptr(), y.as_mut_ptr(),
-                &mut ierr, herr.as_mut_ptr(), REFPROP_STRLEN as c_long,
+                &t,
+                self.z.as_ptr(),
+                &kph,
+                &mut p,
+                &mut dl,
+                &mut dv,
+                x.as_mut_ptr(),
+                y.as_mut_ptr(),
+                &mut ierr,
+                herr.as_mut_ptr(),
+                REFPROP_STRLEN as c_long,
             );
         }
         Self::check_err(ierr, &herr)?;
-        Ok(SaturationProps { temperature: t, pressure: p,
-            density_liquid: dl, density_vapor: dv })
+        Ok(SaturationProps {
+            temperature: t,
+            pressure: p,
+            density_liquid: dl,
+            density_vapor: dv,
+        })
     }
 
     fn sat_p_inner(&self, p: f64) -> Result<SaturationProps> {
@@ -343,15 +451,26 @@ impl RefpropBackend {
 
         unsafe {
             self.lib.SATPdll(
-                &p, self.z.as_ptr(), &kph,
-                &mut t, &mut dl, &mut dv,
-                x.as_mut_ptr(), y.as_mut_ptr(),
-                &mut ierr, herr.as_mut_ptr(), REFPROP_STRLEN as c_long,
+                &p,
+                self.z.as_ptr(),
+                &kph,
+                &mut t,
+                &mut dl,
+                &mut dv,
+                x.as_mut_ptr(),
+                y.as_mut_ptr(),
+                &mut ierr,
+                herr.as_mut_ptr(),
+                REFPROP_STRLEN as c_long,
             );
         }
         Self::check_err(ierr, &herr)?;
-        Ok(SaturationProps { temperature: t, pressure: p,
-            density_liquid: dl, density_vapor: dv })
+        Ok(SaturationProps {
+            temperature: t,
+            pressure: p,
+            density_liquid: dl,
+            density_vapor: dv,
+        })
     }
 
     /// THERMdll: compute all thermo props from (T, D).
@@ -360,15 +479,30 @@ impl RefpropBackend {
             (0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
         unsafe {
             self.lib.THERMdll(
-                &t, &d, self.z.as_ptr(),
-                &mut p, &mut e, &mut h, &mut s,
-                &mut cv, &mut cp, &mut w, &mut hjt,
+                &t,
+                &d,
+                self.z.as_ptr(),
+                &mut p,
+                &mut e,
+                &mut h,
+                &mut s,
+                &mut cv,
+                &mut cp,
+                &mut w,
+                &mut hjt,
             );
         }
         ThermoProp {
-            temperature: t, pressure: p, density: d,
-            enthalpy: h, entropy: s, cv, cp, sound_speed: w,
-            quality: f64::NAN, internal_energy: e,
+            temperature: t,
+            pressure: p,
+            density: d,
+            enthalpy: h,
+            entropy: s,
+            cv,
+            cp,
+            sound_speed: w,
+            quality: f64::NAN,
+            internal_energy: e,
         }
     }
 
@@ -379,13 +513,21 @@ impl RefpropBackend {
 
         unsafe {
             self.lib.TRNPRPdll(
-                &t, &d, self.z.as_ptr(),
-                &mut eta, &mut tcx,
-                &mut ierr, herr.as_mut_ptr(), REFPROP_STRLEN as c_long,
+                &t,
+                &d,
+                self.z.as_ptr(),
+                &mut eta,
+                &mut tcx,
+                &mut ierr,
+                herr.as_mut_ptr(),
+                REFPROP_STRLEN as c_long,
             );
         }
         Self::check_err(ierr, &herr)?;
-        Ok(TransportProps { viscosity: eta, thermal_conductivity: tcx })
+        Ok(TransportProps {
+            viscosity: eta,
+            thermal_conductivity: tcx,
+        })
     }
 
     /// T–Q flash: saturation + interpolation via THERMdll.
@@ -401,9 +543,7 @@ impl RefpropBackend {
     }
 
     /// Interpolate between saturated liquid and vapor using quality.
-    fn interpolate_quality(
-        &self, t: f64, p: f64, dl: f64, dv: f64, q: f64,
-    ) -> Result<ThermoProp> {
+    fn interpolate_quality(&self, t: f64, p: f64, dl: f64, dv: f64, q: f64) -> Result<ThermoProp> {
         if q <= 0.0 {
             let mut props = self.therm_inner(t, dl);
             props.quality = 0.0;
@@ -421,7 +561,9 @@ impl RefpropBackend {
         let lerp = |a: f64, b: f64| a * (1.0 - q) + b * q;
 
         Ok(ThermoProp {
-            temperature: t, pressure: p, density: d,
+            temperature: t,
+            pressure: p,
+            density: d,
             enthalpy: lerp(liq.enthalpy, vap.enthalpy),
             entropy: lerp(liq.entropy, vap.entropy),
             cv: lerp(liq.cv, vap.cv),
@@ -509,12 +651,20 @@ impl RefpropBackend {
         unsafe {
             self.lib.CRITPdll(
                 self.z.as_ptr(),
-                &mut tc, &mut pc, &mut dc,
-                &mut ierr, herr.as_mut_ptr(), REFPROP_STRLEN as c_long,
+                &mut tc,
+                &mut pc,
+                &mut dc,
+                &mut ierr,
+                herr.as_mut_ptr(),
+                REFPROP_STRLEN as c_long,
             );
         }
         Self::check_err(ierr, &herr)?;
-        Ok(CriticalProps { temperature: tc, pressure: pc, density: dc })
+        Ok(CriticalProps {
+            temperature: tc,
+            pressure: pc,
+            density: dc,
+        })
     }
 
     pub fn fluid_info(&self) -> Result<FluidInfo> {
@@ -528,17 +678,21 @@ impl RefpropBackend {
 
         unsafe {
             self.lib.INFOdll(
-                &icomp, &mut wmm, &mut ttrp, &mut tnbpt,
-                &mut tc, &mut pc, &mut dc,
-                &mut zc, &mut acf, &mut dip, &mut rgas,
+                &icomp, &mut wmm, &mut ttrp, &mut tnbpt, &mut tc, &mut pc, &mut dc, &mut zc,
+                &mut acf, &mut dip, &mut rgas,
             );
         }
         Ok(FluidInfo {
-            molar_mass: wmm, triple_point_temp: ttrp,
-            normal_boiling_point: tnbpt, critical_temperature: tc,
-            critical_pressure: pc, critical_density: dc,
-            compressibility_factor: zc, acentric_factor: acf,
-            dipole_moment: dip, gas_constant: rgas,
+            molar_mass: wmm,
+            triple_point_temp: ttrp,
+            normal_boiling_point: tnbpt,
+            critical_temperature: tc,
+            critical_pressure: pc,
+            critical_density: dc,
+            compressibility_factor: zc,
+            acentric_factor: acf,
+            dipole_moment: dip,
+            gas_constant: rgas,
         })
     }
 
@@ -561,9 +715,8 @@ impl RefpropBackend {
             let (mut d5, mut d6, mut d7, mut d8, mut d9) = (0.0, 0.0, 0.0, 0.0, 0.0);
             unsafe {
                 self.lib.INFOdll(
-                    &icomp, &mut wmm, &mut d1, &mut d2,
-                    &mut d3, &mut d4, &mut d5,
-                    &mut d6, &mut d7, &mut d8, &mut d9,
+                    &icomp, &mut wmm, &mut d1, &mut d2, &mut d3, &mut d4, &mut d5, &mut d6,
+                    &mut d7, &mut d8, &mut d9,
                 );
             }
             m_mix += self.z[i] * wmm;
@@ -585,12 +738,7 @@ impl RefpropBackend {
     ///
     /// Supported input pairs: **(T,P)  (P,H)  (P,S)  (T,Q)  (P,Q)**.
     /// Keys are **case-insensitive**.
-    pub fn get(
-        &self,
-        output: &str,
-        key1: &str, val1: f64,
-        key2: &str, val2: f64,
-    ) -> Result<f64> {
+    pub fn get(&self, output: &str, key1: &str, val1: f64, key2: &str, val2: f64) -> Result<f64> {
         Self::validate_finite(key1, val1)?;
         Self::validate_finite(key2, val2)?;
 
@@ -663,7 +811,8 @@ impl RefpropBackend {
     fn check_err(ierr: i32, herr: &[i8]) -> Result<()> {
         if ierr > 0 {
             return Err(RefpropError::Refprop {
-                code: ierr, message: from_c_string(herr),
+                code: ierr,
+                message: from_c_string(herr),
             });
         }
         if ierr < 0 {

@@ -1,6 +1,6 @@
 [package]
 name = "refprop-rs"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 description = "Safe Rust bindings for NIST REFPROP – thermodynamic & transport properties of refrigerants, pure fluids, and mixtures"
 license = "MIT"
@@ -17,6 +17,7 @@ path = "src/lib.rs"
 libloading = "0.9"
 thiserror = "2.0"
 dotenvy = "0.15"
+serde = { version = "1.0", features = ["derive"] }
 
 [dev-dependencies]
 approx = "0.5"

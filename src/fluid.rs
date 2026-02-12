@@ -71,10 +71,7 @@ impl Fluid {
     /// )?;
     /// # Ok::<(), refprop::RefpropError>(())
     /// ```
-    pub fn mixture_with_units(
-        components: &[(&str, f64)],
-        units: UnitSystem,
-    ) -> Result<Self> {
+    pub fn mixture_with_units(components: &[(&str, f64)], units: UnitSystem) -> Result<Self> {
         Self::load_dotenv();
         let refprop_path = Self::find_refprop_path()?;
         let backend = RefpropBackend::new_mixture(components, &refprop_path)?;
@@ -88,15 +85,22 @@ impl Fluid {
     fn load_dotenv() {
         static DOTENV_INIT: Once = Once::new();
         DOTENV_INIT.call_once(|| {
-            if dotenvy::dotenv().is_ok() { return; }
+            if dotenvy::dotenv().is_ok() {
+                return;
+            }
             if let Ok(dir) = std::env::var("CARGO_MANIFEST_DIR") {
                 let p = std::path::PathBuf::from(dir).join(".env");
-                if p.exists() { let _ = dotenvy::from_path(&p); return; }
+                if p.exists() {
+                    let _ = dotenvy::from_path(&p);
+                    return;
+                }
             }
             if let Ok(exe) = std::env::current_exe() {
                 if let Some(dir) = exe.parent() {
                     let p = dir.join(".env");
-                    if p.exists() { let _ = dotenvy::from_path(&p); }
+                    if p.exists() {
+                        let _ = dotenvy::from_path(&p);
+                    }
                 }
             }
         });
@@ -108,7 +112,9 @@ impl Fluid {
         let mut tried = Vec::<String>::new();
 
         if let Ok(path) = env::var("REFPROP_PATH") {
-            if Path::new(&path).exists() { return Ok(path); }
+            if Path::new(&path).exists() {
+                return Ok(path);
+            }
             tried.push(format!("REFPROP_PATH={path} (directory does not exist)"));
         }
 
@@ -123,7 +129,9 @@ impl Fluid {
         let standard_paths = ["/Applications/REFPROP", "/opt/refprop"];
 
         for path in standard_paths {
-            if Path::new(path).exists() { return Ok(path.to_string()); }
+            if Path::new(path).exists() {
+                return Ok(path.to_string());
+            }
             tried.push(format!("{path} (not found)"));
         }
 
@@ -146,12 +154,7 @@ impl Fluid {
     /// let d = f.get("D", "T", 0.0, "Q", 1.0)?;   // 0 °C → kg/m³
     /// # Ok::<(), refprop::RefpropError>(())
     /// ```
-    pub fn get(
-        &self,
-        output: &str,
-        key1: &str, val1: f64,
-        key2: &str, val2: f64,
-    ) -> Result<f64> {
+    pub fn get(&self, output: &str, key1: &str, val1: f64, key2: &str, val2: f64) -> Result<f64> {
         let v1 = self.conv.input_to_rp(key1, val1);
         let v2 = self.conv.input_to_rp(key2, val2);
         let raw = self.backend.get(output, key1, v1, key2, v2)?;
@@ -160,46 +163,37 @@ impl Fluid {
 
     /// Temperature–pressure flash.
     pub fn props_tp(&self, t: f64, p: f64) -> Result<ThermoProp> {
-        let raw = self.backend.props_tp(
-            self.conv.t_to_rp(t),
-            self.conv.p_to_rp(p),
-        )?;
+        let raw = self
+            .backend
+            .props_tp(self.conv.t_to_rp(t), self.conv.p_to_rp(p))?;
         Ok(self.convert_thermo(raw))
     }
 
     /// Pressure–enthalpy flash.
     pub fn props_ph(&self, p: f64, h: f64) -> Result<ThermoProp> {
-        let raw = self.backend.props_ph(
-            self.conv.p_to_rp(p),
-            self.conv.h_to_rp(h),
-        )?;
+        let raw = self
+            .backend
+            .props_ph(self.conv.p_to_rp(p), self.conv.h_to_rp(h))?;
         Ok(self.convert_thermo(raw))
     }
 
     /// Pressure–entropy flash.
     pub fn props_ps(&self, p: f64, s: f64) -> Result<ThermoProp> {
-        let raw = self.backend.props_ps(
-            self.conv.p_to_rp(p),
-            self.conv.s_to_rp(s),
-        )?;
+        let raw = self
+            .backend
+            .props_ps(self.conv.p_to_rp(p), self.conv.s_to_rp(s))?;
         Ok(self.convert_thermo(raw))
     }
 
     /// Temperature–quality flash.
     pub fn props_tq(&self, t: f64, q: f64) -> Result<ThermoProp> {
-        let raw = self.backend.props_tq(
-            self.conv.t_to_rp(t),
-            q,
-        )?;
+        let raw = self.backend.props_tq(self.conv.t_to_rp(t), q)?;
         Ok(self.convert_thermo(raw))
     }
 
     /// Pressure–quality flash.
     pub fn props_pq(&self, p: f64, q: f64) -> Result<ThermoProp> {
-        let raw = self.backend.props_pq(
-            self.conv.p_to_rp(p),
-            q,
-        )?;
+        let raw = self.backend.props_pq(self.conv.p_to_rp(p), q)?;
         Ok(self.convert_thermo(raw))
     }
 
@@ -217,10 +211,9 @@ impl Fluid {
 
     /// Transport properties at (T, D) — density must be in user units.
     pub fn transport(&self, t: f64, d: f64) -> Result<TransportProps> {
-        let raw = self.backend.transport(
-            self.conv.t_to_rp(t),
-            self.conv.d_to_rp(d),
-        )?;
+        let raw = self
+            .backend
+            .transport(self.conv.t_to_rp(t), self.conv.d_to_rp(d))?;
         Ok(TransportProps {
             viscosity: self.conv.eta_from_rp(raw.viscosity),
             thermal_conductivity: self.conv.tcx_from_rp(raw.thermal_conductivity),
@@ -232,8 +225,8 @@ impl Fluid {
         let raw = self.backend.critical_point()?;
         Ok(CriticalProps {
             temperature: self.conv.t_from_rp(raw.temperature),
-            pressure:    self.conv.p_from_rp(raw.pressure),
-            density:     self.conv.d_from_rp(raw.density),
+            pressure: self.conv.p_from_rp(raw.pressure),
+            density: self.conv.d_from_rp(raw.density),
         })
     }
 
@@ -255,25 +248,25 @@ impl Fluid {
 
     fn convert_thermo(&self, raw: ThermoProp) -> ThermoProp {
         ThermoProp {
-            temperature:     self.conv.t_from_rp(raw.temperature),
-            pressure:        self.conv.p_from_rp(raw.pressure),
-            density:         self.conv.d_from_rp(raw.density),
-            enthalpy:        self.conv.h_from_rp(raw.enthalpy),
-            entropy:         self.conv.s_from_rp(raw.entropy),
-            cv:              self.conv.s_from_rp(raw.cv),
-            cp:              self.conv.s_from_rp(raw.cp),
-            sound_speed:     raw.sound_speed,
-            quality:         raw.quality,
+            temperature: self.conv.t_from_rp(raw.temperature),
+            pressure: self.conv.p_from_rp(raw.pressure),
+            density: self.conv.d_from_rp(raw.density),
+            enthalpy: self.conv.h_from_rp(raw.enthalpy),
+            entropy: self.conv.s_from_rp(raw.entropy),
+            cv: self.conv.s_from_rp(raw.cv),
+            cp: self.conv.s_from_rp(raw.cp),
+            sound_speed: raw.sound_speed,
+            quality: raw.quality,
             internal_energy: self.conv.h_from_rp(raw.internal_energy),
         }
     }
 
     fn convert_sat(&self, raw: SaturationProps) -> SaturationProps {
         SaturationProps {
-            temperature:    self.conv.t_from_rp(raw.temperature),
-            pressure:       self.conv.p_from_rp(raw.pressure),
-            density_liquid:  self.conv.d_from_rp(raw.density_liquid),
-            density_vapor:   self.conv.d_from_rp(raw.density_vapor),
+            temperature: self.conv.t_from_rp(raw.temperature),
+            pressure: self.conv.p_from_rp(raw.pressure),
+            density_liquid: self.conv.d_from_rp(raw.density_liquid),
+            density_vapor: self.conv.d_from_rp(raw.density_vapor),
         }
     }
 }

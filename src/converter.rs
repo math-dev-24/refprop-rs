@@ -23,12 +23,14 @@
 //!     .pressure(PressUnit::Bar);
 //! ```
 
+use serde::{Deserialize, Serialize};
+
 // ────────────────────────────────────────────────────────────────────
 //  Unit enums
 // ────────────────────────────────────────────────────────────────────
 
 /// Temperature unit.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum TempUnit {
     /// Kelvin (REFPROP native)
     Kelvin,
@@ -39,7 +41,7 @@ pub enum TempUnit {
 }
 
 /// Pressure unit.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum PressUnit {
     /// Kilopascal (REFPROP native)
     KPa,
@@ -56,7 +58,7 @@ pub enum PressUnit {
 }
 
 /// Density unit.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum DensityUnit {
     /// mol/L (REFPROP native)
     MolPerL,
@@ -65,7 +67,7 @@ pub enum DensityUnit {
 }
 
 /// Energy / enthalpy unit.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum EnergyUnit {
     /// J/mol (REFPROP native)
     JPerMol,
@@ -76,7 +78,7 @@ pub enum EnergyUnit {
 }
 
 /// Entropy / heat-capacity unit (energy per temperature).
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum EntropyUnit {
     /// J/(mol·K) (REFPROP native)
     JPerMolK,
@@ -87,7 +89,7 @@ pub enum EntropyUnit {
 }
 
 /// Dynamic viscosity unit.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ViscosityUnit {
     /// µPa·s (REFPROP native)
     MicroPaS,
@@ -98,7 +100,7 @@ pub enum ViscosityUnit {
 }
 
 /// Thermal conductivity unit.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ConductivityUnit {
     /// W/(m·K) (REFPROP native)
     WPerMK,
@@ -114,33 +116,35 @@ pub enum ConductivityUnit {
 ///
 /// Create one with a preset (`refprop()`, `engineering()`, `si()`) or
 /// customise individual properties with the builder methods.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct UnitSystem {
-    pub temperature:  TempUnit,
-    pub pressure:     PressUnit,
-    pub density:      DensityUnit,
-    pub energy:       EnergyUnit,
-    pub entropy:      EntropyUnit,
-    pub viscosity:    ViscosityUnit,
+    pub temperature: TempUnit,
+    pub pressure: PressUnit,
+    pub density: DensityUnit,
+    pub energy: EnergyUnit,
+    pub entropy: EntropyUnit,
+    pub viscosity: ViscosityUnit,
     pub conductivity: ConductivityUnit,
 }
 
 impl UnitSystem {
     /// Start from REFPROP-native units.  Use the builder methods to
     /// change individual properties.
-    pub fn new() -> Self { Self::refprop() }
+    pub fn new() -> Self {
+        Self::refprop()
+    }
 
     // ── Presets ──────────────────────────────────────────────────────
 
     /// REFPROP native: K, kPa, mol/L, J/mol, J/(mol·K), µPa·s, W/(m·K).
     pub fn refprop() -> Self {
         Self {
-            temperature:  TempUnit::Kelvin,
-            pressure:     PressUnit::KPa,
-            density:      DensityUnit::MolPerL,
-            energy:       EnergyUnit::JPerMol,
-            entropy:      EntropyUnit::JPerMolK,
-            viscosity:    ViscosityUnit::MicroPaS,
+            temperature: TempUnit::Kelvin,
+            pressure: PressUnit::KPa,
+            density: DensityUnit::MolPerL,
+            energy: EnergyUnit::JPerMol,
+            entropy: EntropyUnit::JPerMolK,
+            viscosity: ViscosityUnit::MicroPaS,
             conductivity: ConductivityUnit::WPerMK,
         }
     }
@@ -148,12 +152,12 @@ impl UnitSystem {
     /// Engineering / HVAC: °C, bar, kg/m³, kJ/kg, kJ/(kg·K).
     pub fn engineering() -> Self {
         Self {
-            temperature:  TempUnit::Celsius,
-            pressure:     PressUnit::Bar,
-            density:      DensityUnit::KgPerM3,
-            energy:       EnergyUnit::KJPerKg,
-            entropy:      EntropyUnit::KJPerKgK,
-            viscosity:    ViscosityUnit::MicroPaS,
+            temperature: TempUnit::Celsius,
+            pressure: PressUnit::Bar,
+            density: DensityUnit::KgPerM3,
+            energy: EnergyUnit::KJPerKg,
+            entropy: EntropyUnit::KJPerKgK,
+            viscosity: ViscosityUnit::MicroPaS,
             conductivity: ConductivityUnit::WPerMK,
         }
     }
@@ -161,29 +165,52 @@ impl UnitSystem {
     /// Strict SI: K, Pa, kg/m³, J/kg, J/(kg·K), Pa·s.
     pub fn si() -> Self {
         Self {
-            temperature:  TempUnit::Kelvin,
-            pressure:     PressUnit::Pa,
-            density:      DensityUnit::KgPerM3,
-            energy:       EnergyUnit::JPerKg,
-            entropy:      EntropyUnit::JPerKgK,
-            viscosity:    ViscosityUnit::PaS,
+            temperature: TempUnit::Kelvin,
+            pressure: PressUnit::Pa,
+            density: DensityUnit::KgPerM3,
+            energy: EnergyUnit::JPerKg,
+            entropy: EntropyUnit::JPerKgK,
+            viscosity: ViscosityUnit::PaS,
             conductivity: ConductivityUnit::WPerMK,
         }
     }
 
     // ── Builder methods ─────────────────────────────────────────────
 
-    pub fn temperature(mut self, u: TempUnit) -> Self { self.temperature = u; self }
-    pub fn pressure(mut self, u: PressUnit) -> Self { self.pressure = u; self }
-    pub fn density(mut self, u: DensityUnit) -> Self { self.density = u; self }
-    pub fn energy(mut self, u: EnergyUnit) -> Self { self.energy = u; self }
-    pub fn entropy(mut self, u: EntropyUnit) -> Self { self.entropy = u; self }
-    pub fn viscosity(mut self, u: ViscosityUnit) -> Self { self.viscosity = u; self }
-    pub fn conductivity(mut self, u: ConductivityUnit) -> Self { self.conductivity = u; self }
+    pub fn temperature(mut self, u: TempUnit) -> Self {
+        self.temperature = u;
+        self
+    }
+    pub fn pressure(mut self, u: PressUnit) -> Self {
+        self.pressure = u;
+        self
+    }
+    pub fn density(mut self, u: DensityUnit) -> Self {
+        self.density = u;
+        self
+    }
+    pub fn energy(mut self, u: EnergyUnit) -> Self {
+        self.energy = u;
+        self
+    }
+    pub fn entropy(mut self, u: EntropyUnit) -> Self {
+        self.entropy = u;
+        self
+    }
+    pub fn viscosity(mut self, u: ViscosityUnit) -> Self {
+        self.viscosity = u;
+        self
+    }
+    pub fn conductivity(mut self, u: ConductivityUnit) -> Self {
+        self.conductivity = u;
+        self
+    }
 }
 
 impl Default for UnitSystem {
-    fn default() -> Self { Self::refprop() }
+    fn default() -> Self {
+        Self::refprop()
+    }
 }
 
 // ────────────────────────────────────────────────────────────────────
@@ -209,7 +236,10 @@ impl Converter {
     /// Identity converter — no conversion at all (REFPROP native units,
     /// molar mass = 1 so mass-based formulas still work formally).
     pub fn identity() -> Self {
-        Self { units: UnitSystem::refprop(), molar_mass: 1.0 }
+        Self {
+            units: UnitSystem::refprop(),
+            molar_mass: 1.0,
+        }
     }
 
     // ── Temperature ─────────────────────────────────────────────────
@@ -217,7 +247,7 @@ impl Converter {
     /// User → REFPROP (K)
     pub fn t_to_rp(&self, t: f64) -> f64 {
         match self.units.temperature {
-            TempUnit::Kelvin  => t,
+            TempUnit::Kelvin => t,
             TempUnit::Celsius => t + 273.15,
             TempUnit::Fahrenheit => (t - 32.0) * 5.0 / 9.0 + 273.15,
         }
@@ -226,7 +256,7 @@ impl Converter {
     /// REFPROP (K) → User
     pub fn t_from_rp(&self, t: f64) -> f64 {
         match self.units.temperature {
-            TempUnit::Kelvin  => t,
+            TempUnit::Kelvin => t,
             TempUnit::Celsius => t - 273.15,
             TempUnit::Fahrenheit => (t - 273.15) * 9.0 / 5.0 + 32.0,
         }
@@ -240,7 +270,7 @@ impl Converter {
             PressUnit::KPa => p,
             PressUnit::Bar => p * 100.0,
             PressUnit::MPa => p * 1000.0,
-            PressUnit::Pa  => p / 1000.0,
+            PressUnit::Pa => p / 1000.0,
             PressUnit::Atm => p * 101.325,
             PressUnit::Psi => p * 6.894_757,
         }
@@ -252,7 +282,7 @@ impl Converter {
             PressUnit::KPa => p,
             PressUnit::Bar => p / 100.0,
             PressUnit::MPa => p / 1000.0,
-            PressUnit::Pa  => p * 1000.0,
+            PressUnit::Pa => p * 1000.0,
             PressUnit::Atm => p / 101.325,
             PressUnit::Psi => p / 6.894_757,
         }
@@ -283,7 +313,7 @@ impl Converter {
         match self.units.energy {
             EnergyUnit::JPerMol => h,
             EnergyUnit::KJPerKg => h * self.molar_mass,
-            EnergyUnit::JPerKg  => h * self.molar_mass / 1000.0,
+            EnergyUnit::JPerKg => h * self.molar_mass / 1000.0,
         }
     }
 
@@ -292,7 +322,7 @@ impl Converter {
         match self.units.energy {
             EnergyUnit::JPerMol => h,
             EnergyUnit::KJPerKg => h / self.molar_mass,
-            EnergyUnit::JPerKg  => h * 1000.0 / self.molar_mass,
+            EnergyUnit::JPerKg => h * 1000.0 / self.molar_mass,
         }
     }
 
@@ -303,7 +333,7 @@ impl Converter {
         match self.units.entropy {
             EntropyUnit::JPerMolK => s,
             EntropyUnit::KJPerKgK => s * self.molar_mass,
-            EntropyUnit::JPerKgK  => s * self.molar_mass / 1000.0,
+            EntropyUnit::JPerKgK => s * self.molar_mass / 1000.0,
         }
     }
 
@@ -312,7 +342,7 @@ impl Converter {
         match self.units.entropy {
             EntropyUnit::JPerMolK => s,
             EntropyUnit::KJPerKgK => s / self.molar_mass,
-            EntropyUnit::JPerKgK  => s * 1000.0 / self.molar_mass,
+            EntropyUnit::JPerKgK => s * 1000.0 / self.molar_mass,
         }
     }
 
@@ -323,7 +353,7 @@ impl Converter {
         match self.units.viscosity {
             ViscosityUnit::MicroPaS => eta,
             ViscosityUnit::MilliPaS => eta / 1000.0,
-            ViscosityUnit::PaS      => eta / 1_000_000.0,
+            ViscosityUnit::PaS => eta / 1_000_000.0,
         }
     }
 
@@ -332,7 +362,7 @@ impl Converter {
         match self.units.viscosity {
             ViscosityUnit::MicroPaS => eta,
             ViscosityUnit::MilliPaS => eta * 1000.0,
-            ViscosityUnit::PaS      => eta * 1_000_000.0,
+            ViscosityUnit::PaS => eta * 1_000_000.0,
         }
     }
 
@@ -341,7 +371,7 @@ impl Converter {
     /// REFPROP (W/(m·K)) → User
     pub fn tcx_from_rp(&self, tcx: f64) -> f64 {
         match self.units.conductivity {
-            ConductivityUnit::WPerMK     => tcx,
+            ConductivityUnit::WPerMK => tcx,
             ConductivityUnit::MilliWPerMK => tcx * 1000.0,
         }
     }
@@ -349,7 +379,7 @@ impl Converter {
     /// User → REFPROP (W/(m·K))
     pub fn tcx_to_rp(&self, tcx: f64) -> f64 {
         match self.units.conductivity {
-            ConductivityUnit::WPerMK     => tcx,
+            ConductivityUnit::WPerMK => tcx,
             ConductivityUnit::MilliWPerMK => tcx / 1000.0,
         }
     }
@@ -361,32 +391,32 @@ impl Converter {
     /// `"P"`, `"H"`, …).
     pub fn input_to_rp(&self, key: &str, val: f64) -> f64 {
         match key.to_uppercase().as_str() {
-            "T"                     => self.t_to_rp(val),
-            "P"                     => self.p_to_rp(val),
-            "D" | "RHO"            => self.d_to_rp(val),
-            "H"                     => self.h_to_rp(val),
-            "S"                     => self.s_to_rp(val),
-            "E" | "U"              => self.h_to_rp(val),
-            "CV" | "CP"            => self.s_to_rp(val),
-            "ETA" | "V" | "VIS"    => self.eta_to_rp(val),
+            "T" => self.t_to_rp(val),
+            "P" => self.p_to_rp(val),
+            "D" | "RHO" => self.d_to_rp(val),
+            "H" => self.h_to_rp(val),
+            "S" => self.s_to_rp(val),
+            "E" | "U" => self.h_to_rp(val),
+            "CV" | "CP" => self.s_to_rp(val),
+            "ETA" | "V" | "VIS" => self.eta_to_rp(val),
             "TCX" | "L" | "LAMBDA" => self.tcx_to_rp(val),
-            _                       => val, // Q, W, etc.
+            _ => val, // Q, W, etc.
         }
     }
 
     /// Convert a REFPROP output value to user units.
     pub fn output_from_rp(&self, key: &str, val: f64) -> f64 {
         match key.to_uppercase().as_str() {
-            "T"                     => self.t_from_rp(val),
-            "P"                     => self.p_from_rp(val),
-            "D" | "RHO"            => self.d_from_rp(val),
-            "H"                     => self.h_from_rp(val),
-            "S"                     => self.s_from_rp(val),
-            "E" | "U"              => self.h_from_rp(val),
-            "CV" | "CP"            => self.s_from_rp(val),
-            "ETA" | "V" | "VIS"    => self.eta_from_rp(val),
+            "T" => self.t_from_rp(val),
+            "P" => self.p_from_rp(val),
+            "D" | "RHO" => self.d_from_rp(val),
+            "H" => self.h_from_rp(val),
+            "S" => self.s_from_rp(val),
+            "E" | "U" => self.h_from_rp(val),
+            "CV" | "CP" => self.s_from_rp(val),
+            "ETA" | "V" | "VIS" => self.eta_from_rp(val),
             "TCX" | "L" | "LAMBDA" => self.tcx_from_rp(val),
-            _                       => val, // Q, W, etc.
+            _ => val, // Q, W, etc.
         }
     }
 }
