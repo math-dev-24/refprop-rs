@@ -731,7 +731,7 @@ impl RefpropBackend {
     /// Retrieve a single property value given two input constraints.
     ///
     /// ```text
-    /// fluid.get("D", "T", 273.15, "Q", 1.0)   // density of sat. vapor at 0 °C
+    /// fluid.get("D", "T", 273.15, "Q", 100.0)  // density of sat. vapor at 0 °C
     /// fluid.get("P", "T", 300.0,  "D", 12.0)   // pressure at T=300 K, D=12 mol/L
     /// fluid.get("H", "P", 500.0,  "T", 298.15) // enthalpy at 5 bar, 25 °C
     /// ```

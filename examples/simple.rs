@@ -37,15 +37,19 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("PH flash (P=500, H={:.2}):\n{ph}\n", props.enthalpy);
 
     // ── TQ flash: saturated vapor at 0 °C ─────────────────────────
-    let tq = r134a.props_tq(273.15, 1.0)?;
-    println!("TQ flash (T=273.15 K, Q=1):\n{tq}\n");
+    let tq = r134a.props_tq(273.15, 100.0)?;
+    println!("TQ flash (T=273.15 K, Q=100%):\n{tq}\n");
 
     // ── Generic get() – CoolProp style ────────────────────────────
-    let d = r134a.get("D", "T", 273.15, "Q", 1.0)?;
-    println!("get(D, T=273.15, Q=1) = {d:.6} mol/L");
+    let d = r134a.get("D", "T", 273.15, "Q", 100.0)?;
+    println!("get(D, T=273.15, Q=100) = {d:.6} mol/L");
 
     let p_sat = r134a.get("P", "T", 273.15, "Q", 0.0)?;
     println!("get(P, T=273.15, Q=0) = {p_sat:.4} kPa");
 
+    let p_sat = Fluid::new("R407C")?
+    .get("P", "T", 273.15, "Q", 0.0)?;
+
+    println!("get(P, T=273.15, Q=0) = {p_sat:.4} kPa");
     Ok(())
 }

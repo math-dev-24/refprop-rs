@@ -43,7 +43,7 @@ impl Fluid {
     /// use refprop::{Fluid, UnitSystem};
     ///
     /// let f = Fluid::with_units("R134A", UnitSystem::engineering())?;
-    /// let p = f.get("P", "T", -5.0, "Q", 1.0)?;   // °C → bar
+    /// let p = f.get("P", "T", -5.0, "Q", 100.0)?;  // °C → bar
     /// # Ok::<(), refprop::RefpropError>(())
     /// ```
     pub fn with_units(fluid_name: &str, units: UnitSystem) -> Result<Self> {
@@ -151,12 +151,12 @@ impl Fluid {
     /// ```no_run
     /// # use refprop::{Fluid, UnitSystem};
     /// let f = Fluid::with_units("R134A", UnitSystem::engineering())?;
-    /// let d = f.get("D", "T", 0.0, "Q", 1.0)?;   // 0 °C → kg/m³
+    /// let d = f.get("D", "T", 0.0, "Q", 100.0)?;  // 0 °C → kg/m³
     /// # Ok::<(), refprop::RefpropError>(())
     /// ```
     pub fn get(&self, output: &str, key1: &str, val1: f64, key2: &str, val2: f64) -> Result<f64> {
-        let v1 = self.conv.input_to_rp(key1, val1);
-        let v2 = self.conv.input_to_rp(key2, val2);
+        let v1 = self.conv.input_to_rp(key1, val1)?;
+        let v2 = self.conv.input_to_rp(key2, val2)?;
         let raw = self.backend.get(output, key1, v1, key2, v2)?;
         Ok(self.conv.output_from_rp(output, raw))
     }
@@ -186,14 +186,22 @@ impl Fluid {
     }
 
     /// Temperature–quality flash.
+    ///
+    /// Quality `q` is in **percent** (0–100).
     pub fn props_tq(&self, t: f64, q: f64) -> Result<ThermoProp> {
-        let raw = self.backend.props_tq(self.conv.t_to_rp(t), q)?;
+        let raw = self
+            .backend
+            .props_tq(self.conv.t_to_rp(t), self.conv.q_to_rp(q)?)?;
         Ok(self.convert_thermo(raw))
     }
 
     /// Pressure–quality flash.
+    ///
+    /// Quality `q` is in **percent** (0–100).
     pub fn props_pq(&self, p: f64, q: f64) -> Result<ThermoProp> {
-        let raw = self.backend.props_pq(self.conv.p_to_rp(p), q)?;
+        let raw = self
+            .backend
+            .props_pq(self.conv.p_to_rp(p), self.conv.q_to_rp(q)?)?;
         Ok(self.convert_thermo(raw))
     }
 
@@ -256,7 +264,7 @@ impl Fluid {
             cv: self.conv.s_from_rp(raw.cv),
             cp: self.conv.s_from_rp(raw.cp),
             sound_speed: raw.sound_speed,
-            quality: raw.quality,
+            quality: self.conv.q_from_rp(raw.quality),
             internal_energy: self.conv.h_from_rp(raw.internal_energy),
         }
     }

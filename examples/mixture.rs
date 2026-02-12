@@ -36,8 +36,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("=== Generic get() – CoolProp style ===\n");
 
     // Density of R410A saturated vapor at 0 °C
-    let d = r410a.get("D", "T", 273.15, "Q", 1.0)?;
-    println!("R410A  D(T=273.15, Q=1) = {d:.6} mol/L");
+    let d = r410a.get("D", "T", 273.15, "Q", 100.0)?;
+    println!("R410A  D(T=273.15, Q=100) = {d:.6} mol/L");
 
     // Pressure of R410A at T=273.15 K, Q=0 (saturated liquid)
     let p = r410a.get("P", "T", 273.15, "Q", 0.0)?;
@@ -52,8 +52,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("R410A  eta(P=500, T=298.15) = {eta:.4} µPa·s");
 
     // Entropy of R410A at T=280 K, Q=0.5 (two-phase)
-    let s = r410a.get("S", "T", 280.0, "Q", 0.5)?;
-    println!("R410A  S(T=280, Q=0.5) = {s:.4} J/(mol·K)");
+    let s = r410a.get("S", "T", 280.0, "Q", 50.0)?;
+    println!("R410A  S(T=280, Q=50) = {s:.4} J/(mol·K)");
 
     Ok(())
 }

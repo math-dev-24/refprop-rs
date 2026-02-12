@@ -1,6 +1,6 @@
 [package]
 name = "refprop-rs"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2024"
 description = "Safe Rust bindings for NIST REFPROP – thermodynamic & transport properties of refrigerants, pure fluids, and mixtures"
 license = "MIT"

@@ -9,7 +9,7 @@
 //! * **Pure fluids** — `Fluid::new("R134A")`
 //! * **Predefined mixtures** — `Fluid::new("R410A")` (loaded from `.MIX`)
 //! * **Custom mixtures** — `Fluid::mixture(&[("R32", 0.5), ("R125", 0.5)])`
-//! * **CoolProp-style `get()`** — `fluid.get("D", "T", 0.0, "Q", 1.0)`
+//! * **CoolProp-style `get()`** — `fluid.get("D", "T", 0.0, "Q", 100.0)`
 //! * **Configurable units** — work in °C + bar, K + kPa, or any combination
 //! * **Thread-safe** — global mutex prevents data races on REFPROP's singleton state
 //!
@@ -21,10 +21,10 @@
 //! // Engineering units: °C, bar, kg/m³, kJ/kg
 //! let co2 = Fluid::with_units("CO2", UnitSystem::engineering())?;
 //!
-//! let p = co2.get("P", "T", -5.0, "Q", 1.0)?;
+//! let p = co2.get("P", "T", -5.0, "Q", 100.0)?;
 //! println!("Psat(-5 °C) = {p:.2} bar");
 //!
-//! let d = co2.get("D", "T", -5.0, "Q", 1.0)?;
+//! let d = co2.get("D", "T", -5.0, "Q", 100.0)?;
 //! println!("D_vap(-5 °C) = {d:.2} kg/m³");
 //! # Ok::<(), refprop::RefpropError>(())
 //! ```

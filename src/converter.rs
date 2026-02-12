@@ -25,6 +25,8 @@
 
 use serde::{Deserialize, Serialize};
 
+use crate::error::{RefpropError, Result};
+
 // ────────────────────────────────────────────────────────────────────
 //  Unit enums
 // ────────────────────────────────────────────────────────────────────
@@ -384,27 +386,55 @@ impl Converter {
         }
     }
 
+    // ── Quality (vapour fraction) ────────────────────────────────────
+
+    /// User (0–100 %) → REFPROP (0–1 molar fraction).
+    ///
+    /// Returns [`InvalidInput`](RefpropError::InvalidInput) when `q`
+    /// is outside the 0–100 range.
+    pub fn q_to_rp(&self, q: f64) -> Result<f64> {
+        if q < 0.0 || q > 100.0 {
+            return Err(RefpropError::InvalidInput(format!(
+                "Quality Q must be between 0 and 100 (got {q})"
+            )));
+        }
+        Ok(q / 100.0)
+    }
+
+    /// REFPROP (0–1 molar fraction) → User (0–100 %).
+    pub fn q_from_rp(&self, q: f64) -> f64 {
+        q * 100.0
+    }
+
     // ── Generic key-based conversion ────────────────────────────────
 
     /// Convert a user-provided input value to REFPROP units, choosing
     /// the right conversion based on the property key (e.g. `"T"`,
     /// `"P"`, `"H"`, …).
-    pub fn input_to_rp(&self, key: &str, val: f64) -> f64 {
+    ///
+    /// Quality `"Q"` is expected in **percent** (0–100) and is converted
+    /// to the REFPROP molar fraction (0–1).  Values outside 0–100 yield
+    /// an [`InvalidInput`](RefpropError::InvalidInput) error.
+    pub fn input_to_rp(&self, key: &str, val: f64) -> Result<f64> {
         match key.to_uppercase().as_str() {
-            "T" => self.t_to_rp(val),
-            "P" => self.p_to_rp(val),
-            "D" | "RHO" => self.d_to_rp(val),
-            "H" => self.h_to_rp(val),
-            "S" => self.s_to_rp(val),
-            "E" | "U" => self.h_to_rp(val),
-            "CV" | "CP" => self.s_to_rp(val),
-            "ETA" | "V" | "VIS" => self.eta_to_rp(val),
-            "TCX" | "L" | "LAMBDA" => self.tcx_to_rp(val),
-            _ => val, // Q, W, etc.
+            "T" => Ok(self.t_to_rp(val)),
+            "P" => Ok(self.p_to_rp(val)),
+            "D" | "RHO" => Ok(self.d_to_rp(val)),
+            "H" => Ok(self.h_to_rp(val)),
+            "S" => Ok(self.s_to_rp(val)),
+            "E" | "U" => Ok(self.h_to_rp(val)),
+            "CV" | "CP" => Ok(self.s_to_rp(val)),
+            "ETA" | "V" | "VIS" => Ok(self.eta_to_rp(val)),
+            "TCX" | "L" | "LAMBDA" => Ok(self.tcx_to_rp(val)),
+            "Q" => self.q_to_rp(val),
+            _ => Ok(val), // W, etc.
         }
     }
 
     /// Convert a REFPROP output value to user units.
+    ///
+    /// Quality `"Q"` is returned in **percent** (0–100), converted from
+    /// the REFPROP molar fraction (0–1).
     pub fn output_from_rp(&self, key: &str, val: f64) -> f64 {
         match key.to_uppercase().as_str() {
             "T" => self.t_from_rp(val),
@@ -416,7 +446,8 @@ impl Converter {
             "CV" | "CP" => self.s_from_rp(val),
             "ETA" | "V" | "VIS" => self.eta_from_rp(val),
             "TCX" | "L" | "LAMBDA" => self.tcx_from_rp(val),
-            _ => val, // Q, W, etc.
+            "Q" => self.q_from_rp(val),
+            _ => val, // W, etc.
         }
     }
 }
