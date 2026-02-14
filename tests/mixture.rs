@@ -60,6 +60,49 @@ fn r410a_small_glide() {
     );
 }
 
+// ── R407C : TH and TS flash on zeotropic mixture ────────────────────
+
+/// TH flash round-trip on R407C (zeotropic mixture).
+#[test]
+fn r407c_th_flash_superheated() {
+    let r407c = Fluid::with_units("R407C", UnitSystem::engineering()).unwrap();
+    // Reference state: 60 °C, 12 bar (superheated vapor)
+    let ref_props = r407c.props_tp(60.0, 12.0).unwrap();
+    let props = r407c.props_th(60.0, ref_props.enthalpy).unwrap();
+    assert!(
+        (props.pressure - 12.0).abs() < 0.2,
+        "R407C TH flash should recover P ≈ 12 bar, got {:.4}",
+        props.pressure
+    );
+}
+
+/// TS flash round-trip on R407C (zeotropic mixture).
+#[test]
+fn r407c_ts_flash_superheated() {
+    let r407c = Fluid::with_units("R407C", UnitSystem::engineering()).unwrap();
+    let ref_props = r407c.props_tp(60.0, 12.0).unwrap();
+    let props = r407c.props_ts(60.0, ref_props.entropy).unwrap();
+    assert!(
+        (props.pressure - 12.0).abs() < 0.2,
+        "R407C TS flash should recover P ≈ 12 bar, got {:.4}",
+        props.pressure
+    );
+}
+
+/// TH flash via get() on R410A (quasi-azeotropic mixture).
+#[test]
+fn r410a_th_get_density() {
+    let r410a = Fluid::with_units("R410A", UnitSystem::engineering()).unwrap();
+    let ref_props = r410a.props_tp(50.0, 10.0).unwrap();
+    let d = r410a.get("D", "T", 50.0, "H", ref_props.enthalpy).unwrap();
+    assert!(
+        (d - ref_props.density).abs() < 1.0,
+        "R410A get(D, T, H) expected {:.2}, got {:.2}",
+        ref_props.density,
+        d
+    );
+}
+
 // ── Custom mixture (R454C = R32/R1234YF) ────────────────────────────
 
 #[test]
@@ -71,5 +114,8 @@ fn custom_mixture_r454c() {
     .unwrap();
     // Psat de R454C à 0 °C côté bulle, valeur attendue ~4.5 bar
     let p = r454c.get("P", "T", 0.0, "Q", 0.0).unwrap();
-    assert!(p > 3.0 && p < 7.0, "R454C Psat(0 °C) should be reasonable, got {p:.4}");
+    assert!(
+        p > 3.0 && p < 7.0,
+        "R454C Psat(0 °C) should be reasonable, got {p:.4}"
+    );
 }

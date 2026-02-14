@@ -121,6 +121,104 @@ fn r134a_tq_flash_two_phase() {
 }
 
 // ═══════════════════════════════════════════════════════════════════
+//  Flash TH (Temperature-Enthalpy)
+// ═══════════════════════════════════════════════════════════════════
+
+/// TH flash in superheated region: verify round-trip consistency
+/// by first computing H via TP, then recovering P via TH.
+#[test]
+fn r134a_th_flash_superheated() {
+    let r134a = Fluid::with_units("R134A", UnitSystem::engineering()).unwrap();
+    // Get reference properties at 50 °C, 5 bar (superheated vapor)
+    let ref_props = r134a.props_tp(50.0, 5.0).unwrap();
+    // Now recover state from (T, H)
+    let props = r134a.props_th(50.0, ref_props.enthalpy).unwrap();
+    assert!(
+        (props.pressure - 5.0).abs() < 0.05,
+        "TH flash should recover P ≈ 5 bar, got {:.4}",
+        props.pressure
+    );
+    assert!(
+        (props.density - ref_props.density).abs() < 0.5,
+        "TH flash density mismatch: expected {:.2}, got {:.2}",
+        ref_props.density,
+        props.density
+    );
+}
+
+/// TH flash with a different superheated state to verify consistency.
+#[test]
+fn r134a_th_flash_superheated_high_pressure() {
+    let r134a = Fluid::with_units("R134A", UnitSystem::engineering()).unwrap();
+    // 80 °C, 15 bar — well into superheated vapor
+    let ref_props = r134a.props_tp(80.0, 15.0).unwrap();
+    let props = r134a.props_th(80.0, ref_props.enthalpy).unwrap();
+    assert!(
+        (props.pressure - 15.0).abs() < 0.2,
+        "TH flash should recover P ≈ 15 bar, got {:.4}",
+        props.pressure
+    );
+}
+
+/// TH flash via get() — order-independent.
+#[test]
+fn r134a_th_get_pressure() {
+    let r134a = Fluid::with_units("R134A", UnitSystem::engineering()).unwrap();
+    let ref_props = r134a.props_tp(50.0, 5.0).unwrap();
+    let p = r134a.get("P", "T", 50.0, "H", ref_props.enthalpy).unwrap();
+    assert!(
+        (p - 5.0).abs() < 0.05,
+        "get(P, T, H) should return ≈ 5 bar, got {:.4}",
+        p
+    );
+    // Reverse key order
+    let p2 = r134a.get("P", "H", ref_props.enthalpy, "T", 50.0).unwrap();
+    assert!(
+        (p2 - 5.0).abs() < 0.05,
+        "get(P, H, T) reverse order should also work, got {:.4}",
+        p2
+    );
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  Flash TS (Temperature-Entropy)
+// ═══════════════════════════════════════════════════════════════════
+
+/// TS flash in superheated region: verify round-trip consistency
+/// by first computing S via TP, then recovering P via TS.
+#[test]
+fn r134a_ts_flash_superheated() {
+    let r134a = Fluid::with_units("R134A", UnitSystem::engineering()).unwrap();
+    let ref_props = r134a.props_tp(50.0, 5.0).unwrap();
+    let props = r134a.props_ts(50.0, ref_props.entropy).unwrap();
+    assert!(
+        (props.pressure - 5.0).abs() < 0.05,
+        "TS flash should recover P ≈ 5 bar, got {:.4}",
+        props.pressure
+    );
+}
+
+/// TS flash via get() — order-independent.
+#[test]
+fn r134a_ts_get_pressure() {
+    let r134a = Fluid::with_units("R134A", UnitSystem::engineering()).unwrap();
+    let ref_props = r134a.props_tp(25.0, 8.0).unwrap();
+    let p = r134a.get("P", "T", 25.0, "S", ref_props.entropy).unwrap();
+    assert!(
+        (p - 8.0).abs() < 0.1,
+        "get(P, T, S) should return ≈ 8 bar, got {:.4}",
+        p
+    );
+    // Reverse key order
+    let p2 = r134a.get("P", "S", ref_props.entropy, "T", 25.0).unwrap();
+    assert!(
+        (p2 - 8.0).abs() < 0.1,
+        "get(P, S, T) reverse order should also work, got {:.4}",
+        p2
+    );
+}
+
+// ═══════════════════════════════════════════════════════════════════
 //  Flash PQ (Pressure-Quality)
 // ═══════════════════════════════════════════════════════════════════
 

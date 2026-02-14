@@ -534,6 +534,98 @@ impl RefpropBackend {
         })
     }
 
+    fn flash_th_inner(&self, t: f64, h_in: f64) -> Result<ThermoProp> {
+        let (mut kr, mut p, mut d, mut dl, mut dv) = (1.0, 0.0, 0.0, 0.0, 0.0);
+        let mut x = [0.0f64; REFPROP_NC_MAX];
+        let mut y = [0.0f64; REFPROP_NC_MAX];
+        let (mut q, mut e, mut s, mut cv, mut cp, mut w) = (0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+        let mut ierr: i32 = 0;
+        let mut herr = [0i8; REFPROP_STRLEN];
+
+        unsafe {
+            self.lib.THFLSHdll(
+                &t,
+                &h_in,
+                self.z.as_ptr(),
+                &mut kr,
+                &mut p,
+                &mut d,
+                &mut dl,
+                &mut dv,
+                x.as_mut_ptr(),
+                y.as_mut_ptr(),
+                &mut q,
+                &mut e,
+                &mut s,
+                &mut cv,
+                &mut cp,
+                &mut w,
+                &mut ierr,
+                herr.as_mut_ptr(),
+                REFPROP_STRLEN as c_long,
+            );
+        }
+        Self::check_err(ierr, &herr)?;
+        Ok(ThermoProp {
+            temperature: t,
+            pressure: p,
+            density: d,
+            enthalpy: h_in,
+            entropy: s,
+            cv,
+            cp,
+            sound_speed: w,
+            quality: q,
+            internal_energy: e,
+        })
+    }
+
+    fn flash_ts_inner(&self, t: f64, s_in: f64) -> Result<ThermoProp> {
+        let (mut kr, mut p, mut d, mut dl, mut dv) = (1.0, 0.0, 0.0, 0.0, 0.0);
+        let mut x = [0.0f64; REFPROP_NC_MAX];
+        let mut y = [0.0f64; REFPROP_NC_MAX];
+        let (mut q, mut e, mut h, mut cv, mut cp, mut w) = (0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+        let mut ierr: i32 = 0;
+        let mut herr = [0i8; REFPROP_STRLEN];
+
+        unsafe {
+            self.lib.TSFLSHdll(
+                &t,
+                &s_in,
+                self.z.as_ptr(),
+                &mut kr,
+                &mut p,
+                &mut d,
+                &mut dl,
+                &mut dv,
+                x.as_mut_ptr(),
+                y.as_mut_ptr(),
+                &mut q,
+                &mut e,
+                &mut h,
+                &mut cv,
+                &mut cp,
+                &mut w,
+                &mut ierr,
+                herr.as_mut_ptr(),
+                REFPROP_STRLEN as c_long,
+            );
+        }
+        Self::check_err(ierr, &herr)?;
+        Ok(ThermoProp {
+            temperature: t,
+            pressure: p,
+            density: d,
+            enthalpy: h,
+            entropy: s_in,
+            cv,
+            cp,
+            sound_speed: w,
+            quality: q,
+            internal_energy: e,
+        })
+    }
+
     /// T–Q flash: saturation + interpolation via THERMdll.
     ///
     /// For zeotropic mixtures the saturation curve depends on `kph`:
@@ -634,6 +726,22 @@ impl RefpropBackend {
         let mut cid = Self::lock_refprop()?;
         self.ensure_setup(&mut cid)?;
         self.flash_pq_inner(p, q)
+    }
+
+    pub fn props_th(&self, t: f64, h: f64) -> Result<ThermoProp> {
+        Self::validate_finite("temperature", t)?;
+        Self::validate_finite("enthalpy", h)?;
+        let mut cid = Self::lock_refprop()?;
+        self.ensure_setup(&mut cid)?;
+        self.flash_th_inner(t, h)
+    }
+
+    pub fn props_ts(&self, t: f64, s: f64) -> Result<ThermoProp> {
+        Self::validate_finite("temperature", t)?;
+        Self::validate_finite("entropy", s)?;
+        let mut cid = Self::lock_refprop()?;
+        self.ensure_setup(&mut cid)?;
+        self.flash_ts_inner(t, s)
     }
 
     pub fn saturation_p(&self, p: f64) -> Result<SaturationProps> {
@@ -754,7 +862,7 @@ impl RefpropBackend {
     /// fluid.get("H", "P", 500.0,  "T", 298.15) // enthalpy at 5 bar, 25 °C
     /// ```
     ///
-    /// Supported input pairs: **(T,P)  (P,H)  (P,S)  (T,Q)  (P,Q)**.
+    /// Supported input pairs: **(T,P)  (P,H)  (P,S)  (T,Q)  (P,Q)  (T,H)  (T,S)**.
     /// Keys are **case-insensitive**.
     pub fn get(&self, output: &str, key1: &str, val1: f64, key2: &str, val2: f64) -> Result<f64> {
         Self::validate_finite(key1, val1)?;
@@ -782,10 +890,16 @@ impl RefpropBackend {
             ("P", "Q") => self.flash_pq_inner(val1, val2)?,
             ("Q", "P") => self.flash_pq_inner(val2, val1)?,
 
+            ("T", "H") => self.flash_th_inner(val1, val2)?,
+            ("H", "T") => self.flash_th_inner(val2, val1)?,
+
+            ("T", "S") => self.flash_ts_inner(val1, val2)?,
+            ("S", "T") => self.flash_ts_inner(val2, val1)?,
+
             _ => {
                 return Err(RefpropError::InvalidInput(format!(
                     "Unsupported input pair ({k1}, {k2}). \
-                     Supported: (T,P) (P,H) (P,S) (T,Q) (P,Q)"
+                     Supported: (T,P) (P,H) (P,S) (T,Q) (P,Q) (T,H) (T,S)"
                 )));
             }
         };

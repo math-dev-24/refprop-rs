@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Flash (T,H)** — Temperature-Enthalpy flash via `THFLSHdll`: `props_th()`, `get("…", "T", …, "H", …)`
+- **Flash (T,S)** — Temperature-Entropy flash via `TSFLSHdll`: `props_ts()`, `get("…", "T", …, "S", …)`
+- New FFI bindings for `THFLSHdll` and `TSFLSHdll` (REFPROP 9.1+)
+- Integration tests for TH and TS flash (round-trip consistency, `get()` order-independence)
+
 ## [0.2.0] - 2026-02-12
 
 ### Changed

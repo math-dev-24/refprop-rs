@@ -82,6 +82,31 @@ type FnFlash = unsafe extern "C" fn(
     c_long,
 );
 
+/// THFLSHdll / TSFLSHdll / DHFLSHdll … – flash with extra `kr` root
+/// selector:
+/// (in1, in2, z, kr, p/out, d, dl, dv, x, y, q, e, out2, cv, cp, w, ierr, herr, herr_length)
+type FnFlashKr = unsafe extern "C" fn(
+    *const c_double,
+    *const c_double,
+    *const c_double,
+    *mut c_double,
+    *mut c_double,
+    *mut c_double,
+    *mut c_double,
+    *mut c_double,
+    *mut c_double,
+    *mut c_double,
+    *mut c_double,
+    *mut c_double,
+    *mut c_double,
+    *mut c_double,
+    *mut c_double,
+    *mut c_double,
+    *mut c_int,
+    *mut c_char,
+    c_long,
+);
+
 /// SATTdll / SATPdll – same signature:
 /// (in, z, kph, out1..out5, ierr, herr, herr_length)
 type FnSat = unsafe extern "C" fn(
@@ -195,6 +220,8 @@ pub struct RefpropLibrary {
     fn_critp: FnCritp,
     fn_trnprp: FnTrnprp,
     fn_setmix: FnSetmix,
+    fn_thflsh: FnFlashKr,
+    fn_tsflsh: FnFlashKr,
     fn_therm: FnTherm,
     fn_info: FnInfo,
 }
@@ -231,6 +258,8 @@ impl RefpropLibrary {
             fn_critp: Self::resolve(&lib, b"CRITPdll\0")?,
             fn_trnprp: Self::resolve(&lib, b"TRNPRPdll\0")?,
             fn_setmix: Self::resolve(&lib, b"SETMIXdll\0")?,
+            fn_thflsh: Self::resolve(&lib, b"THFLSHdll\0")?,
+            fn_tsflsh: Self::resolve(&lib, b"TSFLSHdll\0")?,
             fn_therm: Self::resolve(&lib, b"THERMdll\0")?,
             fn_info: Self::resolve(&lib, b"INFOdll\0")?,
             _lib: lib,
@@ -585,6 +614,102 @@ impl RefpropLibrary {
                 hfmix_length,
                 hrf_length,
                 hfld_length,
+                herr_length,
+            );
+        }
+    }
+
+    /// Temperature-enthalpy flash calculation.
+    pub unsafe fn THFLSHdll(
+        &self,
+        t: *const c_double,
+        h: *const c_double,
+        z: *const c_double,
+        kr: *mut c_double,
+        p: *mut c_double,
+        d: *mut c_double,
+        dl: *mut c_double,
+        dv: *mut c_double,
+        x: *mut c_double,
+        y: *mut c_double,
+        q: *mut c_double,
+        e: *mut c_double,
+        s: *mut c_double,
+        cv: *mut c_double,
+        cp: *mut c_double,
+        w: *mut c_double,
+        ierr: *mut c_int,
+        herr: *mut c_char,
+        herr_length: c_long,
+    ) {
+        unsafe {
+            (self.fn_thflsh)(
+                t,
+                h,
+                z,
+                kr,
+                p,
+                d,
+                dl,
+                dv,
+                x,
+                y,
+                q,
+                e,
+                s,
+                cv,
+                cp,
+                w,
+                ierr,
+                herr,
+                herr_length,
+            );
+        }
+    }
+
+    /// Temperature-entropy flash calculation.
+    pub unsafe fn TSFLSHdll(
+        &self,
+        t: *const c_double,
+        s: *const c_double,
+        z: *const c_double,
+        kr: *mut c_double,
+        p: *mut c_double,
+        d: *mut c_double,
+        dl: *mut c_double,
+        dv: *mut c_double,
+        x: *mut c_double,
+        y: *mut c_double,
+        q: *mut c_double,
+        e: *mut c_double,
+        h: *mut c_double,
+        cv: *mut c_double,
+        cp: *mut c_double,
+        w: *mut c_double,
+        ierr: *mut c_int,
+        herr: *mut c_char,
+        herr_length: c_long,
+    ) {
+        unsafe {
+            (self.fn_tsflsh)(
+                t,
+                s,
+                z,
+                kr,
+                p,
+                d,
+                dl,
+                dv,
+                x,
+                y,
+                q,
+                e,
+                h,
+                cv,
+                cp,
+                w,
+                ierr,
+                herr,
                 herr_length,
             );
         }

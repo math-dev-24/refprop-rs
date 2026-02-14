@@ -185,6 +185,22 @@ impl Fluid {
         Ok(self.convert_thermo(raw))
     }
 
+    /// Temperature–enthalpy flash.
+    pub fn props_th(&self, t: f64, h: f64) -> Result<ThermoProp> {
+        let raw = self
+            .backend
+            .props_th(self.conv.t_to_rp(t), self.conv.h_to_rp(h))?;
+        Ok(self.convert_thermo(raw))
+    }
+
+    /// Temperature–entropy flash.
+    pub fn props_ts(&self, t: f64, s: f64) -> Result<ThermoProp> {
+        let raw = self
+            .backend
+            .props_ts(self.conv.t_to_rp(t), self.conv.s_to_rp(s))?;
+        Ok(self.convert_thermo(raw))
+    }
+
     /// Temperature–quality flash.
     ///
     /// Quality `q` is in **percent** (0–100).
