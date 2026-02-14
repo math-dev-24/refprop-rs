@@ -7,11 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-02-14
+
 ### Added
 - **Flash (T,H)** — Temperature-Enthalpy flash via `THFLSHdll`: `props_th()`, `get("…", "T", …, "H", …)`
 - **Flash (T,S)** — Temperature-Entropy flash via `TSFLSHdll`: `props_ts()`, `get("…", "T", …, "S", …)`
 - New FFI bindings for `THFLSHdll` and `TSFLSHdll` (REFPROP 9.1+)
-- Integration tests for TH and TS flash (round-trip consistency, `get()` order-independence)
+- Integration tests for TH and TS flash (pure fluids and mixtures)
 
 ## [0.2.0] - 2026-02-12
 
@@ -44,7 +46,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Thermodynamic and transport property calculations
 - Error handling with `thiserror`
 
-[Unreleased]: https://github.com/math-dev-24/refprop-rs/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/math-dev-24/refprop-rs/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/math-dev-24/refprop-rs/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/math-dev-24/refprop-rs/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/math-dev-24/refprop-rs/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/math-dev-24/refprop-rs/releases/tag/v0.1.0
