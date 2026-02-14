@@ -219,6 +219,129 @@ fn r134a_ts_get_pressure() {
 }
 
 // ═══════════════════════════════════════════════════════════════════
+//  Flash TD (Temperature-Density)
+// ═══════════════════════════════════════════════════════════════════
+
+#[test]
+fn r134a_td_flash_round_trip() {
+    let r134a = Fluid::with_units("R134A", UnitSystem::engineering()).unwrap();
+    let ref_props = r134a.props_tp(50.0, 5.0).unwrap();
+    let props = r134a.props_td(50.0, ref_props.density).unwrap();
+    assert!(
+        (props.pressure - 5.0).abs() < 0.05,
+        "TD flash should recover P ≈ 5 bar, got {:.4}",
+        props.pressure
+    );
+}
+
+#[test]
+fn r134a_td_get_enthalpy() {
+    let r134a = Fluid::with_units("R134A", UnitSystem::engineering()).unwrap();
+    let ref_props = r134a.props_tp(25.0, 8.0).unwrap();
+    let h = r134a.get("H", "T", 25.0, "D", ref_props.density).unwrap();
+    assert!(
+        (h - ref_props.enthalpy).abs() < 0.5,
+        "get(H, T, D) expected {:.2}, got {:.2}",
+        ref_props.enthalpy,
+        h
+    );
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  Flash PD (Pressure-Density)
+// ═══════════════════════════════════════════════════════════════════
+
+#[test]
+fn r134a_pd_flash_round_trip() {
+    let r134a = Fluid::with_units("R134A", UnitSystem::engineering()).unwrap();
+    let ref_props = r134a.props_tp(50.0, 5.0).unwrap();
+    let props = r134a.props_pd(5.0, ref_props.density).unwrap();
+    assert!(
+        (props.temperature - 50.0).abs() < 0.1,
+        "PD flash should recover T ≈ 50 °C, got {:.4}",
+        props.temperature
+    );
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  Flash DH (Density-Enthalpy)
+// ═══════════════════════════════════════════════════════════════════
+
+#[test]
+fn r134a_dh_flash_round_trip() {
+    let r134a = Fluid::with_units("R134A", UnitSystem::engineering()).unwrap();
+    let ref_props = r134a.props_tp(50.0, 5.0).unwrap();
+    let props = r134a
+        .props_dh(ref_props.density, ref_props.enthalpy)
+        .unwrap();
+    assert!(
+        (props.temperature - 50.0).abs() < 0.5,
+        "DH flash should recover T ≈ 50 °C, got {:.4}",
+        props.temperature
+    );
+    assert!(
+        (props.pressure - 5.0).abs() < 0.1,
+        "DH flash should recover P ≈ 5 bar, got {:.4}",
+        props.pressure
+    );
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  Flash DS (Density-Entropy)
+// ═══════════════════════════════════════════════════════════════════
+
+#[test]
+fn r134a_ds_flash_round_trip() {
+    let r134a = Fluid::with_units("R134A", UnitSystem::engineering()).unwrap();
+    let ref_props = r134a.props_tp(50.0, 5.0).unwrap();
+    let props = r134a
+        .props_ds(ref_props.density, ref_props.entropy)
+        .unwrap();
+    assert!(
+        (props.temperature - 50.0).abs() < 0.5,
+        "DS flash should recover T ≈ 50 °C, got {:.4}",
+        props.temperature
+    );
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  Flash HS (Enthalpy-Entropy)
+// ═══════════════════════════════════════════════════════════════════
+
+#[test]
+fn r134a_hs_flash_round_trip() {
+    let r134a = Fluid::with_units("R134A", UnitSystem::engineering()).unwrap();
+    let ref_props = r134a.props_tp(50.0, 5.0).unwrap();
+    let props = r134a
+        .props_hs(ref_props.enthalpy, ref_props.entropy)
+        .unwrap();
+    assert!(
+        (props.temperature - 50.0).abs() < 0.5,
+        "HS flash should recover T ≈ 50 °C, got {:.4}",
+        props.temperature
+    );
+    assert!(
+        (props.pressure - 5.0).abs() < 0.1,
+        "HS flash should recover P ≈ 5 bar, got {:.4}",
+        props.pressure
+    );
+}
+
+#[test]
+fn r134a_hs_get_temperature() {
+    let r134a = Fluid::with_units("R134A", UnitSystem::engineering()).unwrap();
+    let ref_props = r134a.props_tp(30.0, 6.0).unwrap();
+    let t = r134a
+        .get("T", "H", ref_props.enthalpy, "S", ref_props.entropy)
+        .unwrap();
+    assert!(
+        (t - 30.0).abs() < 0.5,
+        "get(T, H, S) expected ≈ 30 °C, got {:.4}",
+        t
+    );
+}
+
+// ═══════════════════════════════════════════════════════════════════
 //  Flash PQ (Pressure-Quality)
 // ═══════════════════════════════════════════════════════════════════
 

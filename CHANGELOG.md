@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.2] - 2026-02-14
+
+### Added
+- **Flash (T,D)** — Temperature-Density flash via `TDFLSHdll`: `props_td()`
+- **Flash (P,D)** — Pressure-Density flash via `PDFLSHdll`: `props_pd()`
+- **Flash (D,H)** — Density-Enthalpy flash via `DHFLSHdll`: `props_dh()`
+- **Flash (D,S)** — Density-Entropy flash via `DSFLSHdll`: `props_ds()`
+- **Flash (H,S)** — Enthalpy-Entropy flash via `HSFLSHdll`: `props_hs()`
+- All new pairs also available via `get()` (order-independent, supports `D`/`RHO` alias)
+- Integration tests for all new pairs (pure fluids and mixtures)
+
 ## [0.2.1] - 2026-02-14
 
 ### Added
@@ -46,7 +57,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Thermodynamic and transport property calculations
 - Error handling with `thiserror`
 
-[Unreleased]: https://github.com/math-dev-24/refprop-rs/compare/v0.2.1...HEAD
+[Unreleased]: https://github.com/math-dev-24/refprop-rs/compare/v0.2.2...HEAD
+[0.2.2]: https://github.com/math-dev-24/refprop-rs/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/math-dev-24/refprop-rs/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/math-dev-24/refprop-rs/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/math-dev-24/refprop-rs/compare/v0.1.0...v0.1.1

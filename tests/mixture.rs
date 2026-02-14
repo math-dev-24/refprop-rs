@@ -89,6 +89,34 @@ fn r407c_ts_flash_superheated() {
     );
 }
 
+/// TD flash round-trip on R407C.
+#[test]
+fn r407c_td_flash_superheated() {
+    let r407c = Fluid::with_units("R407C", UnitSystem::engineering()).unwrap();
+    let ref_props = r407c.props_tp(60.0, 12.0).unwrap();
+    let props = r407c.props_td(60.0, ref_props.density).unwrap();
+    assert!(
+        (props.pressure - 12.0).abs() < 0.2,
+        "R407C TD flash should recover P ≈ 12 bar, got {:.4}",
+        props.pressure
+    );
+}
+
+/// HS flash round-trip on R407C.
+#[test]
+fn r407c_hs_flash_superheated() {
+    let r407c = Fluid::with_units("R407C", UnitSystem::engineering()).unwrap();
+    let ref_props = r407c.props_tp(60.0, 12.0).unwrap();
+    let props = r407c
+        .props_hs(ref_props.enthalpy, ref_props.entropy)
+        .unwrap();
+    assert!(
+        (props.temperature - 60.0).abs() < 0.5,
+        "R407C HS flash should recover T ≈ 60 °C, got {:.4}",
+        props.temperature
+    );
+}
+
 /// TH flash via get() on R410A (quasi-azeotropic mixture).
 #[test]
 fn r410a_th_get_density() {

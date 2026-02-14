@@ -185,6 +185,14 @@ impl Fluid {
         Ok(self.convert_thermo(raw))
     }
 
+    /// Temperature–density flash.
+    pub fn props_td(&self, t: f64, d: f64) -> Result<ThermoProp> {
+        let raw = self
+            .backend
+            .props_td(self.conv.t_to_rp(t), self.conv.d_to_rp(d))?;
+        Ok(self.convert_thermo(raw))
+    }
+
     /// Temperature–enthalpy flash.
     pub fn props_th(&self, t: f64, h: f64) -> Result<ThermoProp> {
         let raw = self
@@ -198,6 +206,38 @@ impl Fluid {
         let raw = self
             .backend
             .props_ts(self.conv.t_to_rp(t), self.conv.s_to_rp(s))?;
+        Ok(self.convert_thermo(raw))
+    }
+
+    /// Pressure–density flash.
+    pub fn props_pd(&self, p: f64, d: f64) -> Result<ThermoProp> {
+        let raw = self
+            .backend
+            .props_pd(self.conv.p_to_rp(p), self.conv.d_to_rp(d))?;
+        Ok(self.convert_thermo(raw))
+    }
+
+    /// Density–enthalpy flash.
+    pub fn props_dh(&self, d: f64, h: f64) -> Result<ThermoProp> {
+        let raw = self
+            .backend
+            .props_dh(self.conv.d_to_rp(d), self.conv.h_to_rp(h))?;
+        Ok(self.convert_thermo(raw))
+    }
+
+    /// Density–entropy flash.
+    pub fn props_ds(&self, d: f64, s: f64) -> Result<ThermoProp> {
+        let raw = self
+            .backend
+            .props_ds(self.conv.d_to_rp(d), self.conv.s_to_rp(s))?;
+        Ok(self.convert_thermo(raw))
+    }
+
+    /// Enthalpy–entropy flash.
+    pub fn props_hs(&self, h: f64, s: f64) -> Result<ThermoProp> {
+        let raw = self
+            .backend
+            .props_hs(self.conv.h_to_rp(h), self.conv.s_to_rp(s))?;
         Ok(self.convert_thermo(raw))
     }
 

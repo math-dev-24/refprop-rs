@@ -9,7 +9,7 @@ Safe Rust bindings for [NIST REFPROP](https://www.nist.gov/srd/refprop) -- therm
 - **Custom mixtures** -- `Fluid::mixture(&[("R32", 0.5), ("R125", 0.5)])`
 - **CoolProp-style `get()`** -- `fluid.get("D", "T", 0.0, "Q", 1.0)`
 - **Configurable units** -- work in **°C + bar + kg/m³ + kJ/kg**, or K + kPa, or any mix
-- **Flash calculations** -- TP, PH, PS, TQ, PQ, TH, TS
+- **Flash calculations** -- TP, TD, TH, TS, TQ, PD, PH, PS, PQ, DH, DS, HS
 - **Saturation, transport, critical point, fluid info**
 - **Thread-safe** -- global mutex with automatic fluid re-setup
 - **Dynamic loading** -- no compile-time linking, just point to your REFPROP installation
@@ -162,8 +162,13 @@ let density = fluid.get("D", "T", 25.0, "P", 10.0)?;
 | `P`, `S`  | Pressure + Entropy       |
 | `T`, `Q`  | Temperature + Quality    |
 | `P`, `Q`  | Pressure + Quality       |
+| `T`, `D`  | Temperature + Density    |
 | `T`, `H`  | Temperature + Enthalpy   |
 | `T`, `S`  | Temperature + Entropy    |
+| `P`, `D`  | Pressure + Density       |
+| `D`, `H`  | Density + Enthalpy       |
+| `D`, `S`  | Density + Entropy        |
+| `H`, `S`  | Enthalpy + Entropy       |
 
 ### Output keys
 
@@ -194,8 +199,13 @@ let props = fluid.props_ph(10.0, 250.0)?;  // PH flash
 let props = fluid.props_ps(10.0, 1.2)?;    // PS flash
 let props = fluid.props_tq(0.0, 1.0)?;     // TQ flash (saturation)
 let props = fluid.props_pq(5.0, 0.0)?;     // PQ flash (saturation)
+let props = fluid.props_td(50.0, 30.0)?;   // TD flash
 let props = fluid.props_th(50.0, 280.0)?;  // TH flash
 let props = fluid.props_ts(50.0, 1.1)?;    // TS flash
+let props = fluid.props_pd(5.0, 30.0)?;    // PD flash
+let props = fluid.props_dh(30.0, 280.0)?;  // DH flash
+let props = fluid.props_ds(30.0, 1.1)?;    // DS flash
+let props = fluid.props_hs(280.0, 1.1)?;   // HS flash
 
 let sat = fluid.saturation_t(0.0)?;        // saturation at T
 let sat = fluid.saturation_p(5.0)?;        // saturation at P
